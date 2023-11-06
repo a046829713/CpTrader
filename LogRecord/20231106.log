@@ -1,0 +1,31 @@
+2023-11-06 09:13 ERROR Traceback (most recent call last):
+  File "c:/Users/user/Desktop/程式專區/CpTrader/CpTrader/Trading_Systeam.py", line 326, in main
+    self.engine.Portfolio_start()
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\DQN\lib\Backtest.py", line 548, in Portfolio_start
+    pf = self.Trader.logic_order()
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\DQN\lib\Backtest.py", line 480, in logic_order
+    self.add_data()
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\DQN\lib\Backtest.py", line 475, in add_data
+    self.pf_map[strategy.strategy_name] = Record_Orders(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\DQN\lib\run_model.py", line 25, in __init__
+    self.main_count()
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\DQN\lib\run_model.py", line 43, in main_count
+    net.load_state_dict(torch.load(
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\torch\nn\modules\module.py", line 2152, in load_state_dict
+    raise RuntimeError('Error(s) in loading state_dict for {}:\n\t{}'.format(
+RuntimeError: Error(s) in loading state_dict for DQNConv1DLarge:
+	Missing key(s) in state_dict: "conv.4.weight", "conv.4.bias", "conv.6.weight", "conv.6.bias", "conv.8.weight", "conv.8.bias", "conv.10.weight", "conv.10.bias". 
+	size mismatch for conv.0.weight: copying a param with shape torch.Size([128, 6, 5]) from checkpoint, the shape in current model is torch.Size([32, 6, 5]).
+	size mismatch for conv.0.bias: copying a param with shape torch.Size([128]) from checkpoint, the shape in current model is torch.Size([32]).
+	size mismatch for conv.2.weight: copying a param with shape torch.Size([128, 128, 5]) from checkpoint, the shape in current model is torch.Size([32, 32, 5]).
+	size mismatch for conv.2.bias: copying a param with shape torch.Size([128]) from checkpoint, the shape in current model is torch.Size([32]).
+	size mismatch for fc_val.0.weight: copying a param with shape torch.Size([512, 5376]) from checkpoint, the shape in current model is torch.Size([512, 832]).
+	size mismatch for fc_adv.0.weight: copying a param with shape torch.Size([512, 5376]) from checkpoint, the shape in current model is torch.Size([512, 832]).
+
+2023-11-06 09:22 ERROR Traceback (most recent call last):
+  File "c:/Users/user/Desktop/程式專區/CpTrader/CpTrader/Trading_Systeam.py", line 325, in main
+    self.check_money_level()
+  File "c:/Users/user/Desktop/程式專區/CpTrader/CpTrader/Trading_Systeam.py", line 197, in check_money_level
+    if abs((self.balance_map[key] - value) / self.balance_map[key]) * 100 > 5:
+ZeroDivisionError: float division by zero
+

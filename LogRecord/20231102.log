@@ -1,0 +1,29 @@
+2023-11-02 08:40 ERROR Traceback (most recent call last):
+  File "c:/Users/user/Desktop/程式專區/CpTrader/CpTrader/Trading_Systeam.py", line 303, in main
+    order_finally = self.dataprovider.Binanceapp.change_min_postion(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\custom.py", line 355, in change_min_postion
+    order_quantity = abs(ready_to_order_size)
+TypeError: bad operand type for abs(): 'dict'
+
+2023-11-02 09:51 ERROR Traceback (most recent call last):
+  File "c:/Users/user/Desktop/程式專區/CpTrader/CpTrader/Trading_Systeam.py", line 310, in main
+    self.dataprovider.Binanceapp.execute_orders(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\custom.py", line 58, in wrapper
+    result = func(self, client, *new_args, **new_kwargs)
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\custom.py", line 472, in execute_orders
+    if (float(current_size[each_symbol]) + ready_to_order_size) * symbol_map[each_symbol]['Close'].iloc[-1] < float(Response['maxNotionalValue']):
+KeyError: 'BNBUSDT'
+
+2023-11-02 14:20 ERROR Traceback (most recent call last):
+  File "c:/Users/user/Desktop/程式專區/CpTrader/CpTrader/Trading_Systeam.py", line 310, in main
+    self.dataprovider.Binanceapp.execute_orders(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\custom.py", line 60, in wrapper
+    result = func(self, client, *new_args, **new_kwargs)
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\custom.py", line 489, in execute_orders
+    self._execute_orders(client,
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\custom.py", line 537, in _execute_orders
+    LINE_Alert.req_line_alert(
+TypeError: req_line_alert() missing 1 required positional argument: 'self'
+
+2023-11-02 15:17 ERROR Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x00000210BC13A5B0>

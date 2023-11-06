@@ -1,0 +1,382 @@
+2023-11-01 09:56 ERROR Traceback (most recent call last):
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Database\SQL_operate.py", line 12, in get_db_data
+    self.userconn = router.Router().mysql_financialdata_conn
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Database\router.py", line 13, in __init__
+    self._mysql_conn = self.get_mysql_conn()
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Database\router.py", line 27, in get_mysql_conn
+    engine = create_engine(address)
+  File "<string>", line 2, in create_engine
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\util\deprecations.py", line 281, in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\engine\create.py", line 601, in create_engine
+    dbapi = dbapi_meth(**dbapi_args)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\dialects\mysql\pymysql.py", line 75, in import_dbapi
+    return __import__("pymysql")
+ModuleNotFoundError: No module named 'pymysql'
+
+2023-11-01 09:57 ERROR Traceback (most recent call last):
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Database\SQL_operate.py", line 12, in get_db_data
+    self.userconn = router.Router().mysql_financialdata_conn
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Database\router.py", line 13, in __init__
+    self._mysql_conn = self.get_mysql_conn()
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Database\router.py", line 28, in get_mysql_conn
+    connect = engine.connect()
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\engine\base.py", line 3268, in connect
+    return self._connection_cls(self)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\engine\base.py", line 145, in __init__
+    self._dbapi_connection = engine.raw_connection()
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\engine\base.py", line 3292, in raw_connection
+    return self.pool.connect()
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\pool\base.py", line 452, in connect
+    return _ConnectionFairy._checkout(self)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\pool\base.py", line 1269, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\pool\base.py", line 716, in checkout
+    rec = pool._do_get()
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\pool\impl.py", line 170, in _do_get
+    self._dec_overflow()
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\util\langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\pool\impl.py", line 167, in _do_get
+    return self._create_connection()
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\pool\base.py", line 393, in _create_connection
+    return _ConnectionRecord(self)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\pool\base.py", line 678, in __init__
+    self.__connect()
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\pool\base.py", line 903, in __connect
+    pool.logger.debug("Error on connect(): %s", e)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\util\langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\pool\base.py", line 898, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\engine\create.py", line 637, in connect
+    return dialect.connect(*cargs, **cparams)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\engine\default.py", line 616, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\pymysql\connections.py", line 358, in __init__
+    self.connect()
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\pymysql\connections.py", line 664, in connect
+    self._request_authentication()
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\pymysql\connections.py", line 976, in _request_authentication
+    auth_packet = _auth.caching_sha2_password_auth(self, auth_packet)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\pymysql\_auth.py", line 266, in caching_sha2_password_auth
+    data = sha2_rsa_encrypt(conn.password, conn.salt, conn.server_public_key)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\pymysql\_auth.py", line 143, in sha2_rsa_encrypt
+    raise RuntimeError(
+RuntimeError: 'cryptography' package is required for sha256_password or caching_sha2_password auth methods
+
+2023-11-01 09:58 ERROR Traceback (most recent call last):
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Database\SQL_operate.py", line 12, in get_db_data
+    self.userconn = router.Router().mysql_financialdata_conn
+AttributeError: 'Router' object has no attribute 'mysql_financialdata_conn'
+
+2023-11-01 10:28 ERROR Traceback (most recent call last):
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\DataProvider.py", line 101, in reload_all_data
+    original_df, eachCatchDf = self.reload_data(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\DataProvider.py", line 63, in reload_data
+    original_df, eachCatchDf = self.Binanceapp.BinanceDate.download(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\custom.py", line 39, in warpper
+    result = func(self, client, *args, **kwargs)
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\custom.py", line 198, in download
+    oldest_point, newest_point = cls.minutes_of_new_data(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\custom.py", line 160, in minutes_of_new_data
+    new = pd.to_datetime(client.futures_klines(symbol=symbol, interval=kline_size)[-1][0],
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\binance\client.py", line 6202, in futures_klines
+    return self._request_futures_api('get', 'klines', data=params)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\binance\client.py", line 383, in _request_futures_api
+    return self._request(method, uri, signed, True, **kwargs)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\binance\client.py", line 358, in _request
+    self.response = getattr(self.session, method)(uri, **kwargs)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\requests\sessions.py", line 602, in get
+    return self.request("GET", url, **kwargs)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\requests\sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\requests\sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\requests\adapters.py", line 486, in send
+    resp = conn.urlopen(
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\connectionpool.py", line 791, in urlopen
+    response = self._make_request(
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\connectionpool.py", line 537, in _make_request
+    response = conn.getresponse()
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\connection.py", line 461, in getresponse
+    httplib_response = super().getresponse()
+  File "C:\Program Files\Python38\lib\http\client.py", line 1344, in getresponse
+    response.begin()
+  File "C:\Program Files\Python38\lib\http\client.py", line 307, in begin
+    version, status, reason = self._read_status()
+  File "C:\Program Files\Python38\lib\http\client.py", line 268, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "C:\Program Files\Python38\lib\socket.py", line 669, in readinto
+    return self._sock.recv_into(b)
+  File "C:\Program Files\Python38\lib\ssl.py", line 1241, in recv_into
+    return self.read(nbytes, buffer)
+  File "C:\Program Files\Python38\lib\ssl.py", line 1099, in read
+    return self._sslobj.read(len, buffer)
+KeyboardInterrupt
+
+2023-11-01 10:28 ERROR symbol = XLMUSDT
+2023-11-01 10:28 ERROR Traceback (most recent call last):
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\DataProvider.py", line 101, in reload_all_data
+    original_df, eachCatchDf = self.reload_data(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\DataProvider.py", line 63, in reload_data
+    original_df, eachCatchDf = self.Binanceapp.BinanceDate.download(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\custom.py", line 39, in warpper
+    result = func(self, client, *args, **kwargs)
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\custom.py", line 198, in download
+    oldest_point, newest_point = cls.minutes_of_new_data(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\custom.py", line 160, in minutes_of_new_data
+    new = pd.to_datetime(client.futures_klines(symbol=symbol, interval=kline_size)[-1][0],
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\binance\client.py", line 6202, in futures_klines
+    return self._request_futures_api('get', 'klines', data=params)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\binance\client.py", line 383, in _request_futures_api
+    return self._request(method, uri, signed, True, **kwargs)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\binance\client.py", line 358, in _request
+    self.response = getattr(self.session, method)(uri, **kwargs)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\requests\sessions.py", line 602, in get
+    return self.request("GET", url, **kwargs)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\requests\sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\requests\sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\requests\adapters.py", line 486, in send
+    resp = conn.urlopen(
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\connectionpool.py", line 791, in urlopen
+    response = self._make_request(
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\connectionpool.py", line 468, in _make_request
+    self._validate_conn(conn)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\connectionpool.py", line 1097, in _validate_conn
+    conn.connect()
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\connection.py", line 642, in connect
+    sock_and_verified = _ssl_wrap_socket_and_match_hostname(
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\connection.py", line 783, in _ssl_wrap_socket_and_match_hostname
+    ssl_sock = ssl_wrap_socket(
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\util\ssl_.py", line 471, in ssl_wrap_socket
+    ssl_sock = _ssl_wrap_socket_impl(sock, context, tls_in_tls, server_hostname)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\util\ssl_.py", line 515, in _ssl_wrap_socket_impl
+    return ssl_context.wrap_socket(sock, server_hostname=server_hostname)
+  File "C:\Program Files\Python38\lib\ssl.py", line 500, in wrap_socket
+    return self.sslsocket_class._create(
+  File "C:\Program Files\Python38\lib\ssl.py", line 1040, in _create
+    self.do_handshake()
+  File "C:\Program Files\Python38\lib\ssl.py", line 1309, in do_handshake
+    self._sslobj.do_handshake()
+KeyboardInterrupt
+
+2023-11-01 10:28 ERROR symbol = XTZUSDT
+2023-11-01 10:28 ERROR Traceback (most recent call last):
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\DataProvider.py", line 101, in reload_all_data
+    original_df, eachCatchDf = self.reload_data(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\DataProvider.py", line 63, in reload_data
+    original_df, eachCatchDf = self.Binanceapp.BinanceDate.download(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\custom.py", line 39, in warpper
+    result = func(self, client, *args, **kwargs)
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\custom.py", line 198, in download
+    oldest_point, newest_point = cls.minutes_of_new_data(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\custom.py", line 160, in minutes_of_new_data
+    new = pd.to_datetime(client.futures_klines(symbol=symbol, interval=kline_size)[-1][0],
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\binance\client.py", line 6202, in futures_klines
+    return self._request_futures_api('get', 'klines', data=params)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\binance\client.py", line 383, in _request_futures_api
+    return self._request(method, uri, signed, True, **kwargs)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\binance\client.py", line 358, in _request
+    self.response = getattr(self.session, method)(uri, **kwargs)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\requests\sessions.py", line 602, in get
+    return self.request("GET", url, **kwargs)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\requests\sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\requests\sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\requests\adapters.py", line 486, in send
+    resp = conn.urlopen(
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\connectionpool.py", line 791, in urlopen
+    response = self._make_request(
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\connectionpool.py", line 468, in _make_request
+    self._validate_conn(conn)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\connectionpool.py", line 1097, in _validate_conn
+    conn.connect()
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\connection.py", line 642, in connect
+    sock_and_verified = _ssl_wrap_socket_and_match_hostname(
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\connection.py", line 783, in _ssl_wrap_socket_and_match_hostname
+    ssl_sock = ssl_wrap_socket(
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\util\ssl_.py", line 471, in ssl_wrap_socket
+    ssl_sock = _ssl_wrap_socket_impl(sock, context, tls_in_tls, server_hostname)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\util\ssl_.py", line 515, in _ssl_wrap_socket_impl
+    return ssl_context.wrap_socket(sock, server_hostname=server_hostname)
+  File "C:\Program Files\Python38\lib\ssl.py", line 500, in wrap_socket
+    return self.sslsocket_class._create(
+  File "C:\Program Files\Python38\lib\ssl.py", line 1040, in _create
+    self.do_handshake()
+  File "C:\Program Files\Python38\lib\ssl.py", line 1309, in do_handshake
+    self._sslobj.do_handshake()
+KeyboardInterrupt
+
+2023-11-01 10:28 ERROR symbol = BNBUSDT
+2023-11-01 10:28 ERROR Traceback (most recent call last):
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\DataProvider.py", line 101, in reload_all_data
+    original_df, eachCatchDf = self.reload_data(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\DataProvider.py", line 63, in reload_data
+    original_df, eachCatchDf = self.Binanceapp.BinanceDate.download(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\custom.py", line 39, in warpper
+    result = func(self, client, *args, **kwargs)
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\custom.py", line 198, in download
+    oldest_point, newest_point = cls.minutes_of_new_data(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\custom.py", line 160, in minutes_of_new_data
+    new = pd.to_datetime(client.futures_klines(symbol=symbol, interval=kline_size)[-1][0],
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\binance\client.py", line 6202, in futures_klines
+    return self._request_futures_api('get', 'klines', data=params)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\binance\client.py", line 383, in _request_futures_api
+    return self._request(method, uri, signed, True, **kwargs)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\binance\client.py", line 358, in _request
+    self.response = getattr(self.session, method)(uri, **kwargs)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\requests\sessions.py", line 602, in get
+    return self.request("GET", url, **kwargs)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\requests\sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\requests\sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\requests\adapters.py", line 486, in send
+    resp = conn.urlopen(
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\connectionpool.py", line 791, in urlopen
+    response = self._make_request(
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\connectionpool.py", line 468, in _make_request
+    self._validate_conn(conn)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\connectionpool.py", line 1097, in _validate_conn
+    conn.connect()
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\connection.py", line 642, in connect
+    sock_and_verified = _ssl_wrap_socket_and_match_hostname(
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\connection.py", line 783, in _ssl_wrap_socket_and_match_hostname
+    ssl_sock = ssl_wrap_socket(
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\util\ssl_.py", line 471, in ssl_wrap_socket
+    ssl_sock = _ssl_wrap_socket_impl(sock, context, tls_in_tls, server_hostname)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\util\ssl_.py", line 515, in _ssl_wrap_socket_impl
+    return ssl_context.wrap_socket(sock, server_hostname=server_hostname)
+  File "C:\Program Files\Python38\lib\ssl.py", line 500, in wrap_socket
+    return self.sslsocket_class._create(
+  File "C:\Program Files\Python38\lib\ssl.py", line 1040, in _create
+    self.do_handshake()
+  File "C:\Program Files\Python38\lib\ssl.py", line 1309, in do_handshake
+    self._sslobj.do_handshake()
+KeyboardInterrupt
+
+2023-11-01 10:28 ERROR symbol = ATOMUSDT
+2023-11-01 10:28 ERROR Traceback (most recent call last):
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\DataProvider.py", line 101, in reload_all_data
+    original_df, eachCatchDf = self.reload_data(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\DataProvider.py", line 63, in reload_data
+    original_df, eachCatchDf = self.Binanceapp.BinanceDate.download(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\custom.py", line 39, in warpper
+    result = func(self, client, *args, **kwargs)
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\custom.py", line 198, in download
+    oldest_point, newest_point = cls.minutes_of_new_data(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\custom.py", line 160, in minutes_of_new_data
+    new = pd.to_datetime(client.futures_klines(symbol=symbol, interval=kline_size)[-1][0],
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\binance\client.py", line 6202, in futures_klines
+    return self._request_futures_api('get', 'klines', data=params)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\binance\client.py", line 383, in _request_futures_api
+    return self._request(method, uri, signed, True, **kwargs)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\binance\client.py", line 358, in _request
+    self.response = getattr(self.session, method)(uri, **kwargs)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\requests\sessions.py", line 602, in get
+    return self.request("GET", url, **kwargs)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\requests\sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\requests\sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\requests\adapters.py", line 486, in send
+    resp = conn.urlopen(
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\connectionpool.py", line 791, in urlopen
+    response = self._make_request(
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\connectionpool.py", line 537, in _make_request
+    response = conn.getresponse()
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\urllib3\connection.py", line 461, in getresponse
+    httplib_response = super().getresponse()
+  File "C:\Program Files\Python38\lib\http\client.py", line 1344, in getresponse
+    response.begin()
+  File "C:\Program Files\Python38\lib\http\client.py", line 307, in begin
+    version, status, reason = self._read_status()
+  File "C:\Program Files\Python38\lib\http\client.py", line 268, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "C:\Program Files\Python38\lib\socket.py", line 669, in readinto
+    return self._sock.recv_into(b)
+  File "C:\Program Files\Python38\lib\ssl.py", line 1241, in recv_into
+    return self.read(nbytes, buffer)
+  File "C:\Program Files\Python38\lib\ssl.py", line 1099, in read
+    return self._sslobj.read(len, buffer)
+KeyboardInterrupt
+
+2023-11-01 10:28 ERROR symbol = ONTUSDT
+2023-11-01 11:13 ERROR Traceback (most recent call last):
+  File "c:/Users/user/Desktop/程式專區/CpTrader/CpTrader/Trading_Systeam.py", line 293, in main
+    if self.RL_model:
+AttributeError: 'AsyncTrading_system' object has no attribute 'RL_model'
+
+2023-11-01 11:21 ERROR Traceback (most recent call last):
+  File "c:/Users/user/Desktop/程式專區/CpTrader/CpTrader/Trading_Systeam.py", line 328, in main
+    self.dataprovider.Binanceapp.execute_orders(
+AttributeError: 'AsyncTrading_system' object has no attribute 'line_alert'
+
+2023-11-01 14:45 ERROR Traceback (most recent call last):
+  File "c:/Users/user/Desktop/程式專區/CpTrader/CpTrader/Trading_Systeam.py", line 290, in main
+    info = self.engine.get_symbol_info()
+AttributeError: 'FastCreateOrder' object has no attribute 'get_symbol_info'
+
+2023-11-01 15:47 ERROR Traceback (most recent call last):
+  File "c:/Users/user/Desktop/程式專區/CpTrader/CpTrader/Trading_Systeam.py", line 312, in main
+    # 註冊完資料之後進入回測
+AttributeError: 'FastCreateOrder' object has no attribute 'get_last_status'
+
+2023-11-01 16:17 ERROR Traceback (most recent call last):
+  File "c:/Users/user/Desktop/程式專區/CpTrader/CpTrader/Trading_Systeam.py", line 290, in main
+    last_status = self.engine.get_last_status()
+TypeError: get_last_status() missing 1 required positional argument: 'balance_map'
+
+2023-11-01 16:18 ERROR Traceback (most recent call last):
+  File "c:/Users/user/Desktop/程式專區/CpTrader/CpTrader/Trading_Systeam.py", line 301, in main
+    order_finally = self.dataprovider.transformer.calculation_size(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\utils\Datatransformer.py", line 103, in calculation_size
+    diff_map.update({symbol_name: - float(postition_size)})
+TypeError: float() argument must be a string or a number, not 'dict'
+
+2023-11-01 16:20 ERROR Traceback (most recent call last):
+  File "c:/Users/user/Desktop/程式專區/CpTrader/CpTrader/Trading_Systeam.py", line 301, in main
+    order_finally = self.dataprovider.transformer.calculation_size(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\utils\Datatransformer.py", line 103, in calculation_size
+    diff_map.update({symbol_name: - float(postition_size)})
+TypeError: float() argument must be a string or a number, not 'dict'
+
+2023-11-01 16:33 ERROR Traceback (most recent call last):
+  File "c:/Users/user/Desktop/程式專區/CpTrader/CpTrader/Trading_Systeam.py", line 298, in main
+    order_finally = self.dataprovider.transformer.calculation_size(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\utils\Datatransformer.py", line 103, in calculation_size
+    diff_map.update({symbol_name: - float(postition_size)})
+TypeError: float() argument must be a string or a number, not 'dict'
+
+2023-11-01 16:36 ERROR Traceback (most recent call last):
+  File "c:/Users/user/Desktop/程式專區/CpTrader/CpTrader/Trading_Systeam.py", line 298, in main
+    order_finally = self.dataprovider.transformer.calculation_size(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\utils\Datatransformer.py", line 78, in calculation_size
+    combin_dict.update({combin_symobl: status[0] * status[1]})
+KeyError: 0
+
+2023-11-01 16:38 ERROR Traceback (most recent call last):
+  File "c:/Users/user/Desktop/程式專區/CpTrader/CpTrader/Trading_Systeam.py", line 298, in main
+    order_finally = self.dataprovider.transformer.calculation_size(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\utils\Datatransformer.py", line 78, in calculation_size
+    combin_dict.update({combin_symobl: status[0] * status[1]})
+KeyError: 0
+
+2023-11-01 16:45 ERROR Traceback (most recent call last):
+  File "c:/Users/user/Desktop/程式專區/CpTrader/CpTrader/Trading_Systeam.py", line 298, in main
+    order_finally = self.dataprovider.transformer.calculation_size(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\utils\Datatransformer.py", line 78, in calculation_size
+    combin_dict.update({combin_symobl: status[0] * status[1]})
+KeyError: 0
+
+2023-11-01 17:24 ERROR Traceback (most recent call last):
+  File "c:/Users/user/Desktop/程式專區/CpTrader/CpTrader/Trading_Systeam.py", line 302, in main
+    order_finally = self.dataprovider.Binanceapp.change_min_postion(
+  File "c:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Major\custom.py", line 355, in change_min_postion
+    order_quantity = abs(ready_to_order_size)
+TypeError: bad operand type for abs(): 'dict'
+
