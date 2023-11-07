@@ -55,7 +55,7 @@ class Datatransformer:
 
         return df
 
-    def calculation_size(self, last_status, current_size, symbol_map) -> dict:
+    def calculation_size(self, last_status, current_size, symbol_map,exchange_info:dict) -> dict:
         """_summary_
 
         Args:
@@ -64,19 +64,22 @@ class Datatransformer:
             'DASHUSDT': '341.320', 'FOOTBALLUSDT': '22.15', 'LTCUSDT': '103.450', 'KSMUSDT': '175.1',
             'TRBUSDT': '544.7', 'ZECUSDT': '227.060', 'QNTUSDT': '541.7', 'SOLUSDT': '365', 'GMXUSDT': '141.84', 'YFIUSDT': '0.520', 'ETHUSDT': '19.039', 'EGLDUSDT': '106.3', 'BCHUSDT': '71.770', 'AAVEUSDT': '96.0', 'MKRUSDT': '11.789', 'DEFIUSDT': '4.080', 'COMPUSDT': '51.079', 'BTCDOMUSDT': '19.410', 'BTCUSDT': '0.570'}}
             symbol_map (_type_): _description_
-
+            exchange_info(dict):
+                幣安裡面交易所的資訊
         Returns:
             dict: _description_
         """
+        min_notional_map = self.Get_MIN_NOTIONAL(exchange_info=exchange_info)
+        
         out_dict = {}
         for ID_phonenumber, value in last_status.items():
             diff_map = self._calculation_size(
-                value, current_size[ID_phonenumber], symbol_map)
+                value, current_size[ID_phonenumber], symbol_map, min_notional_map)
             out_dict[ID_phonenumber] = diff_map
 
         return out_dict
 
-    def _calculation_size(self, systeam_size: dict, true_size: dict, symbol_map: dict) -> dict:
+    def _calculation_size(self, systeam_size: dict, true_size: dict, symbol_map: dict,min_notional_map:dict) -> dict:
         """
             用來比較 系統部位 和 Binance 交易所的實際部位
 
@@ -91,6 +94,7 @@ class Datatransformer:
             當計算出來的結果 + 就是要買 - 就是要賣
 
         """
+        
         combin_dict = {}
         for name_key, status in systeam_size.items():
             combin_symobl = name_key.split('-')[0]
@@ -111,11 +115,9 @@ class Datatransformer:
                     continue
                 diff_map.update({symbol_name: postition_size})
             else:
-                # 當目前保證金浮動的時候會有不足的現象
-                # 為避免價格快速浮動小於5美金故調整成10美金
-                # 當我的部位是要減少的時候 不需要小於5美金的規定
+                # 下單要符合幣安各商品最小下單金額限制
                 diff = postition_size - float(true_size[symbol_name])
-                if diff > 0 and abs(symbol_map[symbol_name]['Close'].iloc[-1] * (diff)) < 10:
+                if diff > 0 and abs(symbol_map[symbol_name]['Close'].iloc[-1] * (diff)) < min_notional_map[symbol_name]:
                     continue
                 diff_map.update(
                     {symbol_name: postition_size - float(true_size[symbol_name])})
@@ -275,4 +277,16 @@ class Datatransformer:
                 out_dict.update({symbol: filter_size if order_quantity ==
                                 ready_to_order_size else -1 * filter_size})
 
+        return out_dict
+    def Get_MIN_NOTIONAL(self,exchange_info:dict):
+        """
+            每個商品有自己的最小下單金額限制
+            為了避免下單的波動設計了2倍的設計
+        """
+        out_dict ={}
+        for symbol_info in exchange_info['symbols']:
+            for filter in symbol_info['filters']:
+                if filter['filterType'] == 'MIN_NOTIONAL':
+                    out_dict.update({symbol_info['symbol']:float(filter['notional'])*2})
+        
         return out_dict

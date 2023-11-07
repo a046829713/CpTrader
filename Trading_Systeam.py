@@ -333,7 +333,7 @@ class AsyncTrading_system(Trading_system):
 
                     # >>比對目前binance 內的部位狀態 進行交易
                     all_order_finally = self.dataprovider.transformer.calculation_size(
-                        last_status, current_size, self.symbol_map)
+                        last_status, current_size, self.symbol_map,exchange_info = self.dataprovider.Binanceapp.getfuturesinfo())
 
                     print("測試all_order_finally", all_order_finally)
 
