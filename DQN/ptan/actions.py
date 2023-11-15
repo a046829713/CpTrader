@@ -36,9 +36,9 @@ class EpsilonGreedyActionSelector(ActionSelector):
     def __call__(self, scores):
         assert isinstance(scores, np.ndarray)
         batch_size, n_actions = scores.shape
-        actions = self.selector(scores)
-        mask = np.random.random(size=batch_size) < self.epsilon
-        rand_actions = np.random.choice(n_actions, sum(mask))
+        actions = self.selector(scores)        
+        mask = np.random.random(size=batch_size) < self.epsilon        
+        rand_actions = np.random.choice(n_actions, sum(mask))        
         actions[mask] = rand_actions
         return actions
 

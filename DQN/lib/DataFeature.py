@@ -24,7 +24,10 @@ class DataFeature():
                               'TRBUSDT',
                               'MKRUSDT',
                               'OGNUSDT',
-                              'RNDRUSDT']
+                              'RNDRUSDT',
+                              "DASHUSDT",
+                              "GASUSDT",
+        ]
         # self.targetsymbols = [ 'BTCUSDT']
         self.formal = formal
 

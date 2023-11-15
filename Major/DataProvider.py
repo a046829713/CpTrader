@@ -78,11 +78,12 @@ class DataProvider:
             self.SQL.write_Dateframe(
                 original_df, table_name, exists=exists)
 
-    def reload_all_data(self, time_type, symbol_type):
+    def reload_all_data(self, time_type:str, symbol_type):
         """
             Args:
-            time_type (_type_, optional): _description_. Defaults to None.
-                如果'D' 代表要取用的時間為日線
+            time_type (str): 
+                1d 代表日線
+                1m 代表1分鐘
             用來回補所有symbol的歷史資料
             為了避免寫入過慢 更改成append
 

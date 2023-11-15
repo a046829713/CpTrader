@@ -7,6 +7,7 @@ import re
 from utils.AppSetting import AppSetting
 from .common import Strategy_base_DQN
 import time
+import os
 # 尚未驗算實際下單部位
 
 
@@ -34,18 +35,22 @@ class Record_Orders():
                                 state_1d=self.setting['STATE_1D'], random_ofs_on_reset=False, reward_on_close=self.setting['REWARD_ON_CLOSE'],  volumes=self.setting['VOLUMES_TURNON'])
 
         if self.setting['STATE_1D']:
-            net = models.DQNConv1D(
+            net = models.DQNConv1DLarge(
                 env.observation_space.shape, env.action_space.n)
         else:
             net = models.SimpleFFDQN(
                 env.observation_space.shape[0], env.action_space.n)
 
-        net.load_state_dict(torch.load(
-            self.model_count_path, map_location=lambda storage, loc: storage))
+        if self.model_count_path and os.path.isfile(self.model_count_path) and '.pt' in self.model_count_path :
+            print("pt,model指定運算模式")
+            checkpoint = torch.load(self.model_count_path, map_location=lambda storage, loc: storage)
+            net.load_state_dict(checkpoint['model_state_dict'])
+        else:            
+            net.load_state_dict(torch.load(
+                self.model_count_path, map_location=lambda storage, loc: storage))
 
-        # 对模型进行脚本化，并用示例输入
-        # example_input = torch.tensor(np.array([env.reset()]))  # 使用环境重置作为示例输入
-        # scripted_net = net.script_model(example_input)
+        # 開啟評估模式
+        net.eval()
 
         obs = env.reset()  # 從1開始,並不是從0開始
         start_price = env._state._cur_close()
@@ -78,6 +83,7 @@ class Record_Orders():
         return marketpostion
 
     def getpf(self):
+        print(self.record_orders)
         return Backtest.Backtest(
             self.strategy.df, self.BARS, self.strategy).order_becktest(self.record_orders)
 

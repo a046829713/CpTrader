@@ -133,7 +133,7 @@ class SqlSentense():
                                 `updatetime` = '{result['updatetime']}',
                                 `freq_time` = {result['freq_time']},                    
                                 `symbol` = '{result['symbol']}',
-                                `Strategytype` = '{result['Strategytype']}',
+                                `strategytype` = '{result['strategytype']}',
                                 `avgLoss` = '{result['avgLoss']}'
                                 WHERE `strategyName` = '{result['strategyName']}';
                             """
@@ -149,7 +149,7 @@ class SqlSentense():
         sql_query = f"""
 
             INSERT INTO `crypto_data`.`avgLoss`
-                (`freq_time`, `symbol`, `Strategytype`, `strategyName`, `updatetime`,`avgLoss`)
+                (`freq_time`, `symbol`, `strategytype`, `strategyName`, `updatetime`,`avgLoss`)
             VALUES
             {tuple(result.values())};
             

@@ -33,14 +33,17 @@ class State:
         self.reset_on_close = reset_on_close
         self.reward_on_close = reward_on_close
         self.volumes = volumes
-
+        
+        
     def reset(self, prices, offset):
         assert offset >= self.bars_count-1
         self.have_position = False
         self.open_price = 0.0
         self._prices = prices
         self._offset = offset
-
+        self.cumulative_profit_per= 0.0
+        self.max_profit_per= 0.0
+        self.max_loss_per= 0.0
     @property
     def shape(self):
         # 這邊準備特徵的時候 確實有準備了部位的方向
@@ -105,6 +108,46 @@ class State:
         rel_close = self._prices.close[self._offset]
         return open * (1.0 + rel_close)
     
+    # def step(self, action):
+    #     """
+    #         修改了原作者的setp程序            
+    #         保留了在買進和平倉時​​扣除佣金的邏輯
+    #         當持倉時每支K棒的收盤價與前一支K棒的收盤價進行比較根據漲跌給予即時獎勵。
+    #         在平倉時根據交易的整體盈利或虧損給予獎勵或懲罰。
+    #     Args:
+    #         action (_type_): _description_
+
+    #     Returns:
+    #         _type_: _description_
+    #     """
+    #     assert isinstance(action, Actions)
+    #     reward = 0.0
+    #     done = False
+    #     close = self._cur_close()
+
+    #     if action == Actions.Buy and not self.have_position:
+    #         self.have_position = True
+    #         self.open_price = close * (1 + setting['DEFAULT_SLIPPAGE'])            
+    #         reward -= self.commission_perc  # 扣除佣金
+            
+    #     elif action == Actions.Close and self.have_position:
+    #         reward -= self.commission_perc
+    #         done |= self.reset_on_close
+    #         reward += 100.0 * (close* (1 - setting['DEFAULT_SLIPPAGE']) - self.open_price) / self.open_price            
+    #         self.have_position = False
+    #         self.open_price = 0.0
+
+    #     self._offset += 1
+    #     prev_close = close # 上一根的收盤價
+    #     close = self._cur_close()
+    #     done |= self._offset >= self._prices.close.shape[0]-1
+
+    #     # 訓練時 每一根K棒都給獎勵 (及時獎勵機制)
+    #     if self.have_position and not self.reward_on_close:            
+    #         reward += 100.0 * (close - prev_close) / prev_close
+
+    #     return reward, done
+    
     def step(self, action):
         """
             修改了原作者的setp程序            
@@ -113,6 +156,11 @@ class State:
             在平倉時根據交易的整體盈利或虧損給予獎勵或懲罰。
         Args:
             action (_type_): _description_
+
+        
+        調整即時獎勵/懲罰機制：您可以對即時獎勵/懲罰的計算進行調整，比如在虧損累積到一定程度時增加懲罰的比例，或者在連續虧損時增加懲罰的強度。
+
+        設置停損點：當累積虧損達到一定閾值時，強制平倉並給予懲罰。這可以防止虧損無限擴大。
 
         Returns:
             _type_: _description_
@@ -124,13 +172,13 @@ class State:
 
         if action == Actions.Buy and not self.have_position:
             self.have_position = True
-            self.open_price = close * (1 + setting['DEFAULT_SLIPPAGE'])            
-            reward -= self.commission_perc  # 扣除佣金
+            self.open_price = close * (1 + setting['DEFAULT_SLIPPAGE'])           
+            reward -= 20* self.commission_perc  # 扣除佣金
             
         elif action == Actions.Close and self.have_position:
-            reward -= self.commission_perc
+            reward -= 20*self.commission_perc
             done |= self.reset_on_close
-            reward += 100.0 * (close* (1 - setting['DEFAULT_SLIPPAGE']) - self.open_price) / self.open_price            
+            reward += 50.0 * (close* (1 - setting['DEFAULT_SLIPPAGE']) - self.open_price) / self.open_price
             self.have_position = False
             self.open_price = 0.0
 
@@ -139,11 +187,21 @@ class State:
         close = self._cur_close()
         done |= self._offset >= self._prices.close.shape[0]-1
 
-        # 訓練時 每一根K棒都給獎勵 (及時獎勵機制)
+        
+        # 持倉期間的即時獎勵/懲罰機制
         if self.have_position and not self.reward_on_close:
+            reward += 100.0 * (close - prev_close) / prev_close            
             
-            reward += 100.0 * (close - prev_close) / prev_close
-
+            self.cumulative_profit_per = 20 * (close - self.open_price) / self.open_price
+            
+            self.max_profit_per = max(self.max_profit_per, self.cumulative_profit_per)
+            self.max_loss_per = min(self.max_loss_per, self.cumulative_profit_per)
+            
+            # 基於創新高或新低來分配獎勵和懲罰
+            if self.cumulative_profit_per > self.max_profit_per:
+                reward += self.cumulative_profit_per  
+            elif self.cumulative_profit_per < self.max_loss_per:
+                reward += self.cumulative_profit_per             
         return reward, done
         
 class State1D(State):
@@ -173,7 +231,6 @@ class State1D(State):
             res[dst] = 1.0
             res[dst+1] = (self._cur_close() - self.open_price) / \
                 self.open_price
-               
         return res
 
 

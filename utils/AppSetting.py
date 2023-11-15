@@ -81,10 +81,13 @@ class AppSetting():
             "MODEL_DEFAULT_COMMISSION_PERC": 0.2,  # 已修正乘上100 ( 0.002)
             "DEFAULT_SLIPPAGE": 0.0025,  # 注意滑價是不能乘上100的,因為reward 本來就會乘上100
             "REWARD_ON_CLOSE": False,  # 結束之後才給獎勵
-            "MODEL_COUNT_PATH": r'DQN\20231019-154809-50k-False\mean_val-2.278.data',  # 正式模型
-            # "MODEL_COUNT_PATH": r'saves\20231103-083417-50k-False\mean_val-3.538.data',  # 測試模型
+            # "MODEL_COUNT_PATH": r'DQN\20231019-154809-50k-False\mean_val-2.278.data',  # 正式模型
+            "MODEL_COUNT_PATH": r'saves\20231114-225914-50k-False\mean_val-1.176.data',  # 測試模型
             'STATE_1D': True,  # 使否要採用捲積神經網絡
-            'EPSILON_START': 1.0  # 起始機率(一開始都隨機運行)
+            'EPSILON_START': 1.0,  # 起始機率(一開始都隨機運行)
+            'EVAL_EVERY_STEP': 10000, # 每一萬步驗證一次
+            'NUM_EVAL_EPISODES': 10,  # 每次评估的样本数
+            'STATES_TO_EVALUATE':10000 # 每次驗證一萬筆資料
         }
         return setting_data
 

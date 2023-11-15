@@ -30,23 +30,17 @@ GAMMA = 0.99
 REPLAY_SIZE = 100000
 REPLAY_INITIAL = 10000
 REWARD_STEPS = 2
-STATES_TO_EVALUATE = 1000
-EVAL_EVERY_STEP = 1000
 EPSILON_STOP = 0.1
-CHECKPOINT_EVERY_STEP = 1000000
+CHECKPOINT_EVERY_STEP = 100000
 VALIDATION_EVERY_STEP = 100000
 WRITER_EVERY_STEP = 100
-NUM_EVAL_EPISODES = 10  # 每次评估的样本数
+
 setting = AppSetting.get_DQN_setting()
+
+
 
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    # 用來儲存的位置
-    saves_path = os.path.join(setting['SAVES_PATH'], datetime.strftime(
-        datetime.now(), "%Y%m%d-%H%M%S") + '-' + str(setting['BARS_COUNT']) + 'k-' + str(setting['REWARD_ON_CLOSE']))
-
-    os.makedirs(saves_path, exist_ok=True)
 
     train_data = DataFeature().get_train_net_work_data()
 
@@ -91,9 +85,29 @@ if __name__ == "__main__":
     optimizer = optim.Adam(net.parameters(), lr=setting['LEARNING_RATE'])
 
     # main training loop
-    step_idx = 0
-    eval_states = None
-    best_mean_val = None
+    # 加載檢查點如果存在的話
+    checkpoint_path = r''
+    # checkpoint_path = 
+    if checkpoint_path and os.path.isfile(checkpoint_path) :
+        print("資料繼續運算模式")
+        saves_path = checkpoint_path.split('\\')
+        saves_path = os.path.join(saves_path[0],saves_path[1])
+        checkpoint = torch.load(checkpoint_path)
+        net.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        step_idx = checkpoint['step_idx']        
+        best_mean_val = checkpoint['best_mean_val']
+        
+    else:
+        print("建立新的儲存點")
+        # 用來儲存的位置
+        saves_path = os.path.join(setting['SAVES_PATH'], datetime.strftime(
+            datetime.now(), "%Y%m%d-%H%M%S") + '-' + str(setting['BARS_COUNT']) + 'k-' + str(setting['REWARD_ON_CLOSE']))
+
+        os.makedirs(saves_path, exist_ok=True)
+        step_idx = 0
+        best_mean_val = None
+    
 
     with common.RewardTracker(writer, np.inf, group_rewards=100) as reward_tracker:
         while True:
@@ -115,16 +129,17 @@ if __name__ == "__main__":
             if len(buffer) < REPLAY_INITIAL:
                 continue
 
-            if step_idx % EVAL_EVERY_STEP == 0:
+            if step_idx % setting['EVAL_EVERY_STEP'] == 0:
                 mean_vals = []
-                for _ in range(NUM_EVAL_EPISODES):
+                for _ in range(setting['NUM_EVAL_EPISODES']):
                     # 更新驗證資料
                     eval_states = common.update_eval_states(
-                        buffer, STATES_TO_EVALUATE)
+                        buffer,setting['STATES_TO_EVALUATE'] )
 
                     # 計算平均
                     mean_val = common.calc_values_of_states(
                         eval_states, net, device=device)
+                    
                     mean_vals.append(mean_val)
 
                 mean_of_means = np.mean(mean_vals)
@@ -153,8 +168,19 @@ if __name__ == "__main__":
             if step_idx % TARGET_NET_SYNC == 0:
                 tgt_net.sync()
 
-            # 保存檢查點
+
+            # 保存檢查點的函數
+            def save_checkpoint(state, filename):
+                torch.save(state, filename)
+
+            # 在主訓練循環中的合適位置插入保存檢查點的代碼
             if step_idx % CHECKPOINT_EVERY_STEP == 0:
                 idx = step_idx // CHECKPOINT_EVERY_STEP
-                torch.save(net.state_dict(), os.path.join(
-                    saves_path, "checkpoint-%3d.data" % idx))
+                checkpoint = {
+                    'step_idx': step_idx,
+                    'model_state_dict': net.state_dict(),
+                    'optimizer_state_dict': optimizer.state_dict(),
+                    'selector_state': selector.epsilon,
+                    'best_mean_val': best_mean_val,
+                }
+                save_checkpoint(checkpoint, os.path.join(saves_path, f"checkpoint-{idx}.pt"))

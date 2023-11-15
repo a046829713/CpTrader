@@ -95,8 +95,7 @@ class ExperienceSource:
             if states_input:
                 # 會吐出動作和新狀態[2] [None] # 不過原作者這邊好似沒有使用到agent_states
                 states_actions, new_agent_states = self.agent(states_input, agent_states)               
-                for idx, action in enumerate(states_actions):
-                    
+                for idx, action in enumerate(states_actions):                    
                     g_idx = states_indices[idx]
                     actions[g_idx] = action
                     agent_states[g_idx] = new_agent_states[idx]

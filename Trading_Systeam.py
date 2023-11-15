@@ -109,7 +109,13 @@ class Trading_system():
             if list(filter(lambda x: False if x.lower() + "-f-d" in all_tables else True, allsymobl)):
                 self.dataprovider.reload_all_data(
                     time_type='1d', symbol_type='FUTURES')
-
+    
+    def reload_all_futures_data(self):
+        """
+            用來回補所有日線期貨資料
+        """
+        self.dataprovider.reload_all_data(time_type='1m', symbol_type='FUTURES')
+    
     def exportavgloss(self):
         """
             將avgloss資料匯出
@@ -144,16 +150,15 @@ class Trading_system():
 
         strategylist = avglossdf['strategyName'].to_list()
 
+        print("開始進行更新")
         # 使用 Optimizer # 建立DB
         for eachsymbol in all_symbols:
             target_strategy_name = eachsymbol + '-15K-OB-DQN'
             print(eachsymbol)
-            if target_strategy_name in strategylist:
-                continue
 
             result = Backtest.Optimizer_DQN(
             ).Create_strategy_to_get_avgloss([eachsymbol])
-            print(result)
+            
             if result['strategyName'] in strategylist:
                 self.dataprovider.SQL.change_db_data(
                     SqlSentense.update_avgloss(result))
@@ -373,22 +378,25 @@ def run_asyncio_loop(func, *args, exit_event=None):  # 使用默认参数，使�
         asyncio.run(func(*args))
 
 if __name__ == '__main__':
-    trading_system = AsyncTrading_system()  # 创建类的实例
+    # 即時交易模式
+    # trading_system = AsyncTrading_system()  # 创建类的实例
 
-    thread1 = threading.Thread(target=run_asyncio_loop,
-                               args=(
-                                   trading_system.asyncDataProvider.subscriptionData, trading_system.symbol_name),
-                               kwargs={'exit_event': exit_event})
+    # thread1 = threading.Thread(target=run_asyncio_loop,
+    #                            args=(
+    #                                trading_system.asyncDataProvider.subscriptionData, trading_system.symbol_name),
+    #                            kwargs={'exit_event': exit_event})
 
-    thread2 = threading.Thread(
-        target=run_asyncio_loop, args=(trading_system.main,))
+    # thread2 = threading.Thread(
+    #     target=run_asyncio_loop, args=(trading_system.main,))
 
-    thread3 = threading.Thread(target=trading_system.DailyChange)
+    # thread3 = threading.Thread(target=trading_system.DailyChange)
 
-    thread1.start()
-    thread2.start()
-    thread3.start()
+    # thread1.start()
+    # thread2.start()
+    # thread3.start()
 
-    thread1.join()
-    thread2.join()
-    thread3.join()
+    # thread1.join()
+    # thread2.join()
+    # thread3.join()
+    app = Trading_system()
+    app.count_all_avgloss()

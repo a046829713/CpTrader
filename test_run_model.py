@@ -25,9 +25,10 @@ if __name__ == "__main__":
 
     app = Backtest.Quantify_systeam_DQN(init_cash=20000, formal=False)
 
+    
     # ['BCHUSDT', 'COMPUSDT','OGNUSDT', 'RNDRUSDT']
     # ['SOLUSDT', 'BTCUSDT', 'BTCDOMUSDT', 'DEFIUSDT', 'XMRUSDT', 'AAVEUSDT', 'TRBUSDT', 'MKRUSDT']
     # ['MATICUSDT','DOGEUSDT','XRPUSDT','LTCUSDT','AVAXUSDT']
     # 'LQTYUSDT', 'BANDUSDT', 'TOMOUSDT', 'INJUSDT', 'LINKUSDT', 'ANTUSDT', 'XVSUSDT'
-    app.Portfolio_register(['BTCUSDT'], _get_avgloss())
+    app.Portfolio_register(['ETHUSDT','BTCUSDT'], _get_avgloss())
     app.Portfolio_start()
