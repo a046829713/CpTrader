@@ -1,5 +1,5 @@
 import numpy as np
-
+import time
 
 class ActionSelector:
     """
@@ -33,6 +33,35 @@ class EpsilonGreedyActionSelector(ActionSelector):
         self.epsilon = epsilon
         self.selector = selector if selector is not None else ArgmaxActionSelector()
 
+    # def __call__(self, scores, marketpositions):
+    #     assert isinstance(scores, np.ndarray)
+    #     batch_size, n_actions = scores.shape
+        
+    #     q_values_modified = np.copy(scores)
+    #     actions = np.empty(batch_size,dtype='int64')
+        
+        
+    #     # 生成一次隨機數陣列
+    #     mask = np.random.random(size=batch_size) < self.epsilon
+        
+    #     for i in range(batch_size):
+    #         # 根據市場位置調整分數
+    #         if marketpositions[i].item() == 1:
+    #             q_values_modified[i, 1] = -np.inf
+    #             valid_actions = np.array([0, 2],dtype='int64')  # 排除買入動作
+    #         else:
+    #             q_values_modified[i, 2] = -np.inf
+    #             valid_actions = np.array([0, 1],dtype='int64')  # 排除賣出動作
+
+    #         # ε-greedy 策略
+    #         if mask[i]:        
+    #             actions[i] = np.random.choice(valid_actions)
+    #         else:  
+    #             actions[i] = self.selector(np.expand_dims(q_values_modified[i],axis=0))
+
+    #     return actions
+
+
     def __call__(self, scores):
         assert isinstance(scores, np.ndarray)
         batch_size, n_actions = scores.shape
@@ -41,8 +70,7 @@ class EpsilonGreedyActionSelector(ActionSelector):
         rand_actions = np.random.choice(n_actions, sum(mask))        
         actions[mask] = rand_actions
         return actions
-
-
+    
 class ProbabilityActionSelector(ActionSelector):
     """
     此選擇器根據給定的機率分布隨機選擇行動。這在某些策略上非常有用，特別是當行動的選擇是基於某種機率分布的時候，如在某些策略梯度方法中。

@@ -94,7 +94,8 @@ class ExperienceSource:
             
             if states_input:
                 # 會吐出動作和新狀態[2] [None] # 不過原作者這邊好似沒有使用到agent_states
-                states_actions, new_agent_states = self.agent(states_input, agent_states)               
+                states_actions, new_agent_states = self.agent(states_input, agent_states)
+
                 for idx, action in enumerate(states_actions):                    
                     g_idx = states_indices[idx]
                     actions[g_idx] = action
@@ -123,6 +124,7 @@ class ExperienceSource:
                     if len(history) == self.steps_count and iter_idx % self.steps_delta == 0:
                         yield tuple(history)
                     states[idx] = next_state
+                    # 如果按照這樣來看,如果累積多次的話,會跟原本的reset on close 不一樣
                     if is_done:
                         # generate tail of history
                         while len(history) >= 1:

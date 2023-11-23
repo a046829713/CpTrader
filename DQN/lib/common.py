@@ -136,9 +136,12 @@ def calc_loss(batch, net, tgt_net, gamma, device="cpu"):
 
     state_action_values = net(states_v).gather(
         1, actions_v.unsqueeze(-1)).squeeze(-1)
+    
     next_state_actions = net(next_states_v).max(1)[1]
+    
     next_state_values = tgt_net(next_states_v).gather(
         1, next_state_actions.unsqueeze(-1)).squeeze(-1)
+    
     next_state_values[done_mask] = 0.0
 
     expected_state_action_values = next_state_values.detach() * gamma + rewards_v

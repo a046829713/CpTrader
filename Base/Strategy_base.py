@@ -46,6 +46,9 @@ class Np_Order_Info(object):
         # 取得需要二次運算的資料(計算勝率，賠率....繪圖)
         self.ClosedPostionprofit_array = self.order['ClosedPostionprofit'].to_numpy(
         )
+        
+        
+        print(self.order)
 
     def register(self, strategy_info):
         """將原始策略的資訊記錄起來
@@ -54,6 +57,17 @@ class Np_Order_Info(object):
             strategy_info (_type_): _description_
         """
         self.strategy_info = strategy_info
+
+    @property
+    def holdtime(self) -> float:
+        """
+            計算持有倉位時間 和 未持有倉位時間
+
+        Returns:
+            _type_: _description_
+        """
+        pass
+
 
     @property
     def avgloss(self) -> float:

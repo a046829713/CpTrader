@@ -30,5 +30,5 @@ if __name__ == "__main__":
     # ['SOLUSDT', 'BTCUSDT', 'BTCDOMUSDT', 'DEFIUSDT', 'XMRUSDT', 'AAVEUSDT', 'TRBUSDT', 'MKRUSDT']
     # ['MATICUSDT','DOGEUSDT','XRPUSDT','LTCUSDT','AVAXUSDT']
     # 'LQTYUSDT', 'BANDUSDT', 'TOMOUSDT', 'INJUSDT', 'LINKUSDT', 'ANTUSDT', 'XVSUSDT'
-    app.Portfolio_register(['ETHUSDT','BTCUSDT'], _get_avgloss())
+    app.Portfolio_register(['BTCUSDT'], _get_avgloss())
     app.Portfolio_start()

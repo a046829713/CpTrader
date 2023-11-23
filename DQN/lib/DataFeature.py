@@ -15,20 +15,20 @@ class DataFeature():
 
     def __init__(self, formal: bool = False) -> None:
         # 目前設計是訓練模式才會使用到                            
-        self.targetsymbols = ['SOLUSDT',
-                              'BTCUSDT',
-                              'BTCDOMUSDT',
-                              'DEFIUSDT',
-                              'XMRUSDT',
-                              'AAVEUSDT',
-                              'TRBUSDT',
-                              'MKRUSDT',
-                              'OGNUSDT',
-                              'RNDRUSDT',
-                              "DASHUSDT",
-                              "GASUSDT",
-        ]
-        # self.targetsymbols = [ 'BTCUSDT']
+        # self.targetsymbols = ['SOLUSDT',
+        #                       'BTCUSDT',
+        #                       'BTCDOMUSDT',
+        #                       'DEFIUSDT',
+        #                       'XMRUSDT',
+        #                       'AAVEUSDT',
+        #                       'TRBUSDT',
+        #                       'MKRUSDT',
+        #                       'OGNUSDT',
+        #                       'RNDRUSDT',
+        #                       "DASHUSDT",
+        #                       "GASUSDT",
+        # ]
+        self.targetsymbols = [ 'BTCUSDT']
         self.formal = formal
 
     def load_relative(self):

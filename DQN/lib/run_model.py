@@ -35,7 +35,7 @@ class Record_Orders():
                                 state_1d=self.setting['STATE_1D'], random_ofs_on_reset=False, reward_on_close=self.setting['REWARD_ON_CLOSE'],  volumes=self.setting['VOLUMES_TURNON'])
 
         if self.setting['STATE_1D']:
-            net = models.DQNConv1DLarge(
+            net = models.DQNConv1D(
                 env.observation_space.shape, env.action_space.n)
         else:
             net = models.SimpleFFDQN(
@@ -56,6 +56,8 @@ class Record_Orders():
         start_price = env._state._cur_close()
         step_idx = 0
         self.record_orders = []
+        total_reward = 0.0
+        
         while True:
             step_idx += 1
             obs_v = torch.tensor(np.array([obs]))
@@ -63,6 +65,10 @@ class Record_Orders():
             action_idx = out_v.max(dim=1)[1].item()
             self.record_orders.append(self._parser_order(action_idx))
             obs, reward, done, _ = env.step(action_idx)
+            
+            total_reward += reward            
+            if step_idx % 100 == 0:
+                print("%d: reward=%.3f" % (step_idx, total_reward))
             if done:
                 break
 
@@ -83,7 +89,7 @@ class Record_Orders():
         return marketpostion
 
     def getpf(self):
-        print(self.record_orders)
+        
         return Backtest.Backtest(
             self.strategy.df, self.BARS, self.strategy).order_becktest(self.record_orders)
 

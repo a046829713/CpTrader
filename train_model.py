@@ -47,15 +47,12 @@ if __name__ == "__main__":
     EPSILON_STEPS = 1000000 * len(train_data)
 
     env = environ.StocksEnv(train_data, bars_count=setting['BARS_COUNT'],
-                            reset_on_close=True, state_1d=setting['STATE_1D'], reward_on_close=setting['REWARD_ON_CLOSE'], volumes=setting['VOLUMES_TURNON'])
-
-    env_tst = environ.StocksEnv(
-        train_data, bars_count=setting['BARS_COUNT'], reset_on_close=True, state_1d=setting['STATE_1D'])
+                            reset_on_close=setting['RESET_ON_CLOSE'], state_1d=setting['STATE_1D'], reward_on_close=setting['REWARD_ON_CLOSE'], volumes=setting['VOLUMES_TURNON'])
 
     env = gym.wrappers.TimeLimit(env, max_episode_steps=1000)
 
     if setting['STATE_1D']:
-        net = models.DQNConv1DLarge(env.observation_space.shape,
+        net = models.DQNConv1D(env.observation_space.shape,
                                env.action_space.n).to(device)
         writer = SummaryWriter(
             log_dir=os.path.join(
@@ -73,6 +70,8 @@ if __name__ == "__main__":
     
     tgt_net = ptan.agent.TargetNet(net)
 
+    
+    # 貪婪的選擇器
     selector = ptan.actions.EpsilonGreedyActionSelector(
         setting['EPSILON_START'])
 
@@ -86,7 +85,7 @@ if __name__ == "__main__":
 
     # main training loop
     # 加載檢查點如果存在的話
-    checkpoint_path = r''
+    checkpoint_path = r'saves\20231123-090607-50k-False-True\checkpoint-2.pt'
     # checkpoint_path = 
     if checkpoint_path and os.path.isfile(checkpoint_path) :
         print("資料繼續運算模式")
@@ -102,7 +101,7 @@ if __name__ == "__main__":
         print("建立新的儲存點")
         # 用來儲存的位置
         saves_path = os.path.join(setting['SAVES_PATH'], datetime.strftime(
-            datetime.now(), "%Y%m%d-%H%M%S") + '-' + str(setting['BARS_COUNT']) + 'k-' + str(setting['REWARD_ON_CLOSE']))
+            datetime.now(), "%Y%m%d-%H%M%S") + '-' + str(setting['BARS_COUNT']) + 'k-' + str(setting['REWARD_ON_CLOSE']) +'-'+ str(setting['RESET_ON_CLOSE']))
 
         os.makedirs(saves_path, exist_ok=True)
         step_idx = 0
@@ -125,22 +124,22 @@ if __name__ == "__main__":
             if new_rewards:
                 reward_tracker.reward(
                     new_rewards[0], step_idx, selector.epsilon)
-
+            
             if len(buffer) < REPLAY_INITIAL:
                 continue
 
             if step_idx % setting['EVAL_EVERY_STEP'] == 0:
                 mean_vals = []
-                for _ in range(setting['NUM_EVAL_EPISODES']):
-                    # 更新驗證資料
-                    eval_states = common.update_eval_states(
-                        buffer,setting['STATES_TO_EVALUATE'] )
-
-                    # 計算平均
-                    mean_val = common.calc_values_of_states(
-                        eval_states, net, device=device)
-                    
-                    mean_vals.append(mean_val)
+                
+                with torch.no_grad():  # 禁用梯度計算
+                    for _ in range(setting['NUM_EVAL_EPISODES']):
+                        # 更新驗證資料
+                        eval_states = common.update_eval_states(
+                            buffer,setting['STATES_TO_EVALUATE'] )
+                        # 計算平均
+                        mean_val = common.calc_values_of_states(
+                            eval_states, net, device=device)                        
+                        mean_vals.append(mean_val)
 
                 mean_of_means = np.mean(mean_vals)
 
