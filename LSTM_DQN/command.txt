@@ -1,0 +1,2 @@
+python .\run_model.py -m .\saves\test\mean_val-9.540.data -b 10 -n test
+python .\train_model.py -r test

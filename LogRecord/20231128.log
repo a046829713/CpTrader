@@ -1,0 +1,51 @@
+2023-11-28 07:57 ERROR Traceback (most recent call last):
+  File "C:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Database\SQL_operate.py", line 45, in read_Dateframe
+    self.userconn = router.Router().mysql_conn
+  File "C:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Database\router.py", line 13, in __init__
+    self._mysql_conn = self.get_mysql_conn()
+  File "C:\Users\user\Desktop\程式專區\CpTrader\CpTrader\Database\router.py", line 28, in get_mysql_conn
+    connect = engine.connect()
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\engine\base.py", line 3268, in connect
+    return self._connection_cls(self)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\engine\base.py", line 145, in __init__
+    self._dbapi_connection = engine.raw_connection()
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\engine\base.py", line 3292, in raw_connection
+    return self.pool.connect()
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\pool\base.py", line 452, in connect
+    return _ConnectionFairy._checkout(self)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\pool\base.py", line 1269, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\pool\base.py", line 716, in checkout
+    rec = pool._do_get()
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\pool\impl.py", line 170, in _do_get
+    self._dec_overflow()
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\util\langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\pool\impl.py", line 167, in _do_get
+    return self._create_connection()
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\pool\base.py", line 393, in _create_connection
+    return _ConnectionRecord(self)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\pool\base.py", line 678, in __init__
+    self.__connect()
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\pool\base.py", line 903, in __connect
+    pool.logger.debug("Error on connect(): %s", e)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\util\langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\pool\base.py", line 898, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\engine\create.py", line 637, in connect
+    return dialect.connect(*cargs, **cparams)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\sqlalchemy\engine\default.py", line 616, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\pymysql\connections.py", line 358, in __init__
+    self.connect()
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\pymysql\connections.py", line 664, in connect
+    self._request_authentication()
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\pymysql\connections.py", line 976, in _request_authentication
+    auth_packet = _auth.caching_sha2_password_auth(self, auth_packet)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\pymysql\_auth.py", line 266, in caching_sha2_password_auth
+    data = sha2_rsa_encrypt(conn.password, conn.salt, conn.server_public_key)
+  File "C:\Users\user\Desktop\程式專區\CpTrader\lib\site-packages\pymysql\_auth.py", line 143, in sha2_rsa_encrypt
+    raise RuntimeError(
+RuntimeError: 'cryptography' package is required for sha256_password or caching_sha2_password auth methods
+

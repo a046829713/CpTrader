@@ -31,7 +31,7 @@ class Record_Orders():
             symbol=self.strategy.symbol_name, symbol_data=self.strategy.df)  # len(prices.open) 2562
 
         # 實際上在使用的時候 他並沒有reset_on_close
-        env = environ.StocksEnv(prices, bars_count=self.BARS, reset_on_close=False, commission=self.setting['MODEL_DEFAULT_COMMISSION_PERC'],
+        env = environ.StocksEnv(bars_count=self.BARS, reset_on_close=False, commission=self.setting['MODEL_DEFAULT_COMMISSION_PERC'],
                                 state_1d=self.setting['STATE_1D'], random_ofs_on_reset=False, reward_on_close=self.setting['REWARD_ON_CLOSE'],  volumes=self.setting['VOLUMES_TURNON'])
 
         if self.setting['STATE_1D']:
@@ -66,9 +66,11 @@ class Record_Orders():
             self.record_orders.append(self._parser_order(action_idx))
             obs, reward, done, _ = env.step(action_idx)
             
+            
             total_reward += reward            
             if step_idx % 100 == 0:
                 print("%d: reward=%.3f" % (step_idx, total_reward))
+                # print("動作為:",action_idx,"獎勵為:",reward,"總獎勵:",total_reward)
             if done:
                 break
 
@@ -95,6 +97,6 @@ class Record_Orders():
 
 
     def _parser_order(self, action_value: int):
-        if action_value == 2:
+        if action_value == 0:
             return -1
         return action_value

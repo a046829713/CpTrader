@@ -48,6 +48,7 @@ class RewardTracker:
         self.reward_buf.clear()
         self.steps_buf.clear()
         self.total_rewards.append(reward)
+        
         self.total_steps.append(steps)
         speed = (frame - self.ts_frame) / (time.time() - self.ts)
         self.ts_frame = frame
@@ -125,6 +126,14 @@ def unpack_batch(batch):
 
 
 def calc_loss(batch, net, tgt_net, gamma, device="cpu"):
+    """
+    ************************************************************************************************************************   
+    state_action_values like this : tensor([ 0.0645,  0.0453,  0.0322,  0.0556, -0.0476, -0.0432,  0.0252,  0.0906,
+         0.0539,  0.0750,  0.0675,  0.0596, -0.0412,  0.0456,  0.0526, -0.0150,
+         0.0530,  0.0434,  0.0388, -0.0372,  0.0480,  0.0358,  0.0743,  0.0275,
+         0.0687, -0.0173,  0.0859,  0.0522, -0.0125, -0.0301,  0.0224,  0.0628],
+       device='cuda:0', grad_fn=<SqueezeBackward1>)
+    """
     states, actions, rewards, dones, next_states = unpack_batch(batch)
 
     states_v = torch.tensor(states).to(device)
@@ -134,16 +143,20 @@ def calc_loss(batch, net, tgt_net, gamma, device="cpu"):
 
     done_mask = torch.tensor(dones, dtype=torch.bool).to(device)
 
+
     state_action_values = net(states_v).gather(
         1, actions_v.unsqueeze(-1)).squeeze(-1)
-    
+
     next_state_actions = net(next_states_v).max(1)[1]
     
     next_state_values = tgt_net(next_states_v).gather(
         1, next_state_actions.unsqueeze(-1)).squeeze(-1)
     
+
     next_state_values[done_mask] = 0.0
 
+    
+    # detach 單純的tensor 沒有grad_fn
     expected_state_action_values = next_state_values.detach() * gamma + rewards_v
     return nn.MSELoss()(state_action_values, expected_state_action_values)
 

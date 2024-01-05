@@ -26,7 +26,7 @@ from DQN.lib.analyze import analyze
 # tensorboard --logdir="C:\runs\20231019-154810-conv-"
 
 TARGET_NET_SYNC = 1000
-GAMMA = 0.99
+GAMMA = 1.0
 REPLAY_SIZE = 100000
 REPLAY_INITIAL = 10000
 REWARD_STEPS = 2
@@ -42,14 +42,12 @@ setting = AppSetting.get_DQN_setting()
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    train_data = DataFeature().get_train_net_work_data()
+    EPSILON_STEPS = 2000000 
+    # EPSILON_STEPS = 1000000
 
-    EPSILON_STEPS = 1000000 * len(train_data)
+    env = environ.StocksEnv(bars_count=setting['BARS_COUNT'],reset_on_close = setting['RESET_ON_CLOSE'],state_1d=setting['STATE_1D'], reward_on_close=setting['REWARD_ON_CLOSE'], volumes=setting['VOLUMES_TURNON'])
 
-    env = environ.StocksEnv(train_data, bars_count=setting['BARS_COUNT'],
-                            reset_on_close=setting['RESET_ON_CLOSE'], state_1d=setting['STATE_1D'], reward_on_close=setting['REWARD_ON_CLOSE'], volumes=setting['VOLUMES_TURNON'])
-
-    env = gym.wrappers.TimeLimit(env, max_episode_steps=1000)
+    env = gym.wrappers.TimeLimit(env, max_episode_steps=5000)
 
     if setting['STATE_1D']:
         net = models.DQNConv1D(env.observation_space.shape,
@@ -85,7 +83,7 @@ if __name__ == "__main__":
 
     # main training loop
     # 加載檢查點如果存在的話
-    checkpoint_path = r'saves\20231123-090607-50k-False-True\checkpoint-2.pt'
+    checkpoint_path = r''
     # checkpoint_path = 
     if checkpoint_path and os.path.isfile(checkpoint_path) :
         print("資料繼續運算模式")
@@ -101,14 +99,14 @@ if __name__ == "__main__":
         print("建立新的儲存點")
         # 用來儲存的位置
         saves_path = os.path.join(setting['SAVES_PATH'], datetime.strftime(
-            datetime.now(), "%Y%m%d-%H%M%S") + '-' + str(setting['BARS_COUNT']) + 'k-' + str(setting['REWARD_ON_CLOSE']) +'-'+ str(setting['RESET_ON_CLOSE']))
+            datetime.now(), "%Y%m%d-%H%M%S") + '-' + str(setting['BARS_COUNT']) + 'k-' + str(setting['REWARD_ON_CLOSE']))
 
         os.makedirs(saves_path, exist_ok=True)
         step_idx = 0
         best_mean_val = None
     
 
-    with common.RewardTracker(writer, np.inf, group_rewards=100) as reward_tracker:
+    with common.RewardTracker(writer, np.inf, group_rewards=2) as reward_tracker:
         while True:
             step_idx += 1
             buffer.populate(1)

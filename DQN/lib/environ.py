@@ -5,17 +5,16 @@ import enum
 import numpy as np
 import time
 from utils.AppSetting import AppSetting
-
+from DQN.lib.DataFeature import DataFeature
 setting = AppSetting.get_DQN_setting()
 
 class Actions(enum.Enum):
-    Skip = 0
+    Close = 0
     Buy = 1
-    Close = 2
 
 
 class State:
-    def __init__(self, bars_count, commission_perc, reset_on_close, reward_on_close=True, volumes=True):
+    def __init__(self, bars_count, commission_perc,reset_on_close =False, reward_on_close=True, volumes=True):
         assert isinstance(bars_count, int)
         assert bars_count > 0
         assert isinstance(commission_perc, float)
@@ -24,23 +23,25 @@ class State:
         assert isinstance(reward_on_close, bool)
 
         self.bars_count = bars_count
-        self.commission_perc = commission_perc
-        
-
-        # self.slippagem = slippagem
-        # 後來將滑價拿掉,感覺在計算上,因為reward每跟K棒都會計算難以使用滑價來衡量,但是在實際交易的時候 我認為在考慮就好
-
-        self.reset_on_close = reset_on_close
+        self.commission_perc = commission_perc        
         self.reward_on_close = reward_on_close
         self.volumes = volumes
         
+        self.reset_on_close = reset_on_close
+        self.state_count = 0 # 用來計算自己的次數
+        self.N_steps = 1000 # 這遊戲目前使用多少步學習
         
     def reset(self, prices, offset):
         assert offset >= self.bars_count-1
         self.have_position = False
-        self.open_price = 0.0
+        self.open_price = 0.0        
         self._prices = prices
-        self._offset = offset
+        self._offset = offset        
+        self.cost_sum = 0.0
+        self.closecash= 0.0
+        self.canusecash  = 1.0
+        self.game_steps = 0 # 這次遊戲進行了多久
+        
         
     @property
     def shape(self):
@@ -92,8 +93,8 @@ class State:
             res[shift] = 0.0
         else:
             # 其實我覺得丟這個進去,好像沒什麼用
-            res[shift] = (self._cur_close() - self.open_price) / \
-                self.open_price
+            res[shift] = (self._cur_close() - self.open_price) / self.open_price
+        
         return res
 
     def _cur_close(self):
@@ -106,125 +107,97 @@ class State:
         rel_close = self._prices.close[self._offset]
         return open * (1.0 + rel_close)
     
-    def _cur_high_low(self):
-        ofs = self.bars_count-1
-        this_max_high = np.max(self._prices.high[self._offset-ofs:self._offset+1])
-        this_min_low = np.min(self._prices.low[self._offset-ofs:self._offset+1])
-        
-        return this_max_high - this_min_low
+    def update_N_steps(self, max_length:int = 1000):
+        if self.state_count % 200000 == 0:            
+            self.N_steps += 100
+            print("更新過的N_steps:",self.N_steps)
+            if self.N_steps >= max_length:
+                self.N_steps = max_length
+    
+    def curriculum(self):
+        self.state_count += 1 # 總遊戲次數
+        self.game_steps += 1 # 本次遊戲次數
+        # self.update_N_steps()
         
     def step(self, action):
         """
-            重新建構獎勵:
-                利潤獎勵:Reward pt
-                    取得高低點的差距,來替代標準差距
-                風險利潤:Reward rt
-                    尚未製作
+            重新設計
+            最佳動作空間探索的獎勵函數
+            
+            "找尋和之前所累積的獎勵之差距"
+
         Args:
             action (_type_): _description_
-
-
-        Returns:
-            _type_: _description_
         """
-        assert isinstance(action, Actions)
+        assert isinstance(action, Actions)       
+        
+        # 設計用來教育智能體的課程
+        self.curriculum()
+        
+        
         reward = 0.0
         done = False
         close = self._cur_close()
-        std = self._cur_high_low()
+        
+        # 以平倉損益每局從新歸零
+        closecash_diff = 0.0
+        # 未平倉損益
+        opencash_diff = 0.0
+        # 手續費
+        cost = 0.0
+        
+        # 懲罰
+        punish = 0.0
+        
+        # 第一根買的時候不計算未平倉損益
+        if self.have_position:
+            opencash_diff = (close - self.open_price) / self.open_price
+        
         
         if action == Actions.Buy and not self.have_position:
             self.have_position = True
-            self.open_price = close * (1 + setting['DEFAULT_SLIPPAGE'])           
-            reward -= 2 * self.commission_perc  # 扣除佣金
-            self.position_open_time = self._offset  # 記錄開倉時間
-            
+            # 記錄開盤價
+            self.open_price = close * (1 + setting['DEFAULT_SLIPPAGE'])            
+            cost = -self.commission_perc            
+
         elif action == Actions.Close and self.have_position:
-            reward -= 2 * self.commission_perc
-            
-            
-            # 這邊我認為如果難以全部訓練的話,是否可以累積30次重新reset呢?
-            done |= self.reset_on_close            
-            count_per = (close* (1 - setting['DEFAULT_SLIPPAGE']) - self.open_price) / self.open_price            
-            # 當稀疏獎勵的時候要將獎勵調整,避免懦夫行為
-            reward +=  count_per / std            
-            self.have_position = False
-            self.open_price = 0.0            
-            self.position_open_time = 0  # 重置開倉時間
-            
-        self._offset += 1        
-        prev_close = close # 上一根的收盤價
-        close = self._cur_close()
-        done |= self._offset >= self._prices.close.shape[0]-1        
-    
+            cost = -self.commission_perc
+
+                        
+            self.have_position = False            
+            # 計算出賣掉的資產變化率,並且累加起來
+            closecash_diff = (close * (1 - setting['DEFAULT_SLIPPAGE']) - self.open_price) / self.open_price
+            self.open_price = 0.0
+            opencash_diff = 0.0        
         
-        # 持倉期間的即時獎勵/懲罰機制
-        if self.have_position and not self.reward_on_close:
-            reward +=  (close - prev_close) / prev_close / std            
+        # if action == Actions.Skip or action == Actions.Close and not self.have_position:
+        #     punish =  -0.0001
+
+        # if action == Actions.Skip or action == Actions.Buy  and self.have_position:
+        #     punish =  -0.0001
             
-            
-            # 懲罰(持有倉位過久)
-            if self._offset - self.position_open_time > 100:
-                if self.position_open_time % 100 == 0:
-                    reward -= 0.1 * divmod(self.position_open_time,100)[0] 
+        # 原始獎勵設計        
+        # reward += cost + closecash_diff + opencash_diff
+        self.cost_sum += cost
+        self.closecash += closecash_diff
+        last_canusecash = self.canusecash
+        # 累積的概念為? 淨值 = 起始資金 + 手續費 +  已平倉損益 + 未平倉損益 
+        self.canusecash  =  1.0 + self.cost_sum + self.closecash +  opencash_diff 
+        reward += (self.canusecash - last_canusecash) + punish
+        
+        # 新獎勵設計
+        # print("目前部位",self.have_position,"單次手續費:",cost,"單次已平倉損益:",closecash_diff,"單次未平倉損益:", opencash_diff)
+        # print("目前動作:",action,"總資金:",self.canusecash,"手續費用累積:",self.cost_sum,"累積已平倉損益:",self.closecash,"獎勵差:",reward)
+        # print('*'*120)
+        
+        self._offset += 1
+        # 判斷遊戲是否結束
+        done |= self._offset >= self._prices.close.shape[0] - 1
+        if self.game_steps == self.N_steps and self.reset_on_close:
+            done = True 
         
         return reward, done
     
-
-
-    # def step(self, action):
-    #     """
-    #     执行一步交易操作，并根据操作结果计算奖励或惩罚。
-
-    #     Args:
-    #         action (Actions): 执行的交易动作。
-
-    #     Returns:
-    #         float: 计算出的奖励或惩罚。
-    #         bool: 是否结束本次交易周期。
-    #     """
-    #     assert isinstance(action, Actions)
-    #     reward = 0.0
-    #     done = False
-    #     close = self._cur_close()
-    #     std = self._cur_high_low()
-        
-    #     # 如果执行买入操作且当前没有持仓
-    #     if action == Actions.Buy and not self.have_position:
-    #         self.have_position = True
-    #         self.open_price = close * (1 + setting['DEFAULT_SLIPPAGE'])
-            
-    #         reward -= 2 * self.commission_perc
-            
-    #     # 如果执行平仓操作且当前有持仓
-    #     elif action == Actions.Close and self.have_position:
-    #         reward -= 2 * self.commission_perc
-    #         done |= self.reset_on_close
-    #         count_per = (close * (1 - setting['DEFAULT_SLIPPAGE']) - self.open_price) / self.open_price
-    #         reward += count_per / std
-    #         self.have_position = False
-    #         self.open_price = 0.0
-            
-            
-    #     self._offset += 1
-    #     prev_close = close
-    #     close = self._cur_close()
-    #     done |= self._offset >= self._prices.close.shape[0] - 1
-        
-    #     # 持仓期间的即时奖励/惩罚机制
-    #     if self.have_position and not self.reward_on_close:
-    #         time_held = self._offset - self.position_open_time
-    #         # 如果持仓时间超过预设阈值，则每过一个时间单位惩罚一定分数
-    #         if time_held > TIME_THRESHOLD:
-    #             reward -= PENALTY_PER_TIME_UNIT
-    #         reward += (close - prev_close) / prev_close / std
-        
-    #     return reward, done
-    
-
-    
-
-        
 
 class State1D(State):
     """
@@ -250,29 +223,27 @@ class State1D(State):
             dst = 3
             
         if self.have_position:
-            res[dst] = 1.0
-            res[dst+1] = (self._cur_close() - self.open_price) / \
-                self.open_price
+            res[dst] = 1.0            
+                
+            res[dst+1] = (self._cur_close() - self.open_price) / self.open_price
         return res
 
 
 class StocksEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, prices, bars_count,
-                 commission=setting['MODEL_DEFAULT_COMMISSION_PERC'], reset_on_close=True, state_1d=False,
+    def __init__(self, bars_count,reset_on_close = True,
+                 commission=setting['MODEL_DEFAULT_COMMISSION_PERC'], state_1d=False,
                  random_ofs_on_reset=True, reward_on_close=False, volumes=False):
 
-        
-        assert isinstance(prices, dict)
-        self._prices = prices
+        self._prices = DataFeature().get_train_net_work_data()
 
         if state_1d:
-            self._state = State1D(bars_count, commission, reset_on_close, reward_on_close=reward_on_close,
+            self._state = State1D(bars_count, commission, reset_on_close ,reward_on_close=reward_on_close,
                                   volumes=volumes)
         else:
 
-            self._state = State(bars_count, commission, reset_on_close, reward_on_close=reward_on_close,
+            self._state = State(bars_count, commission,reset_on_close, reward_on_close=reward_on_close,
                                 volumes=volumes)
 
         self.action_space = gym.spaces.Discrete(n=len(Actions))
@@ -318,8 +289,35 @@ class StocksEnv(gym.Env):
         reward, done = self._state.step(action) # 這邊會更新步數
         obs = self._state.encode() # 呼叫這裡的時候就會取得新的狀態
         info = {"instrument": self._instrument, "offset": self._state._offset}
+        
+        self.curriculum()
         return obs, reward, done, info
 
+
+    def curriculum(self):
+        # 更新標的
+        self.targetsymbols = ['BTCUSDT',
+                              'SOLUSDT',
+                              'BTCDOMUSDT',
+                              'DEFIUSDT',
+                              'XMRUSDT',
+                              'AAVEUSDT',
+                              'TRBUSDT',
+                              'MKRUSDT',
+                              'OGNUSDT',
+                              'RNDRUSDT',
+                              "DASHUSDT",
+                              "GASUSDT",
+        ]
+        
+        if self._state.state_count % 500000 == 0 and self._state.state_count !=1:
+            new_targets_index,_ = divmod(self._state.state_count,500000)
+            dataF = DataFeature()
+            dataF.targetsymbols = self.targetsymbols[0 : new_targets_index]
+            # 更新資料
+            self._prices = dataF.get_train_net_work_data()
+    
+    
     def render(self, mode='human', close=False):
         pass
 

@@ -1,1 +1,0 @@
-print('reset_on_close'.upper())
