@@ -108,7 +108,9 @@ class State:
 
         _record_alpha = self.alpha
         _record_price = self.normalize_price(close)        
-        # _record_price = close        
+        
+        
+                
              
         # print("當前動作:",action,"目前部位:",sa_current,"下一個動作:",sa_next,"正則化價格",self.normalize_price(close),"目前獎勵:",reward)
         self.update_alpha(self.all_env_count)
@@ -143,13 +145,6 @@ class Env():
 
         self._state.reset(prices, offset)
         return self._state.encode()
-    
-    
-    def get_leanring_shape(self):
-        """
-            用來給Critic 使用
-        """  
-        return self.reset().flatten().shape[0]
     
     def step(self):
         """

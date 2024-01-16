@@ -18,7 +18,8 @@ class State:
         """
         self.bars_count = bars_count # 所需要使用的K棒數量
         self.setting = AppSetting.get_es_setting()                
-        
+        self.initial_investment = self.setting['INITIAL_INVESTMENT']
+    
     @property
     def shape(self):
         """        
@@ -84,14 +85,60 @@ class State:
     
     def update_alpha(self,step_idx):
         # 每次调用时逐步增加alpha值，但不超过最大值
-        self.alpha = min((step_idx / 10000000) *( self.setting['MODEL_DEFAULT_COMMISSION_PERC'] + self.setting['DEFAULT_SLIPPAGE'] ),self.setting['MODEL_DEFAULT_COMMISSION_PERC'] + self.setting['DEFAULT_SLIPPAGE'])
+        # self.alpha = min((step_idx / 10000000) *( self.setting['MODEL_DEFAULT_COMMISSION_PERC'] + self.setting['DEFAULT_SLIPPAGE'] ),self.setting['MODEL_DEFAULT_COMMISSION_PERC'] + self.setting['DEFAULT_SLIPPAGE'])
+        self.alpha = 0
         
+
+    # def step(self, action,count_play_steps):
+    #     """ 
+    #         買進資產減少
+    #         賣出資產增加
+    #         # 歸一化處理:
+    #         #     通過將每次交易的獎勵除以該股票當時的價格，對獎勵進行歸一化。
+    #         #     這種方法將每次交易的獎勵調整到一個相對一致的範圍，使其對總資金量的影響更加均衡。
+            
+            
+    #     Args:
+    #         action (_type_): _description_
+    #     """
+    #     assert isinstance(action, Actions)       
+        
+    #     reward = 0.0
+    #     change_moeny = 00
+    #     done = False
+    #     close = self._cur_close()        
+        
+    #     # 慢慢更新難度
+    #     self.update_alpha(count_play_steps)
+    #     price_ratio_factor = close / self.initial_investment
+        
+    #     if action == Actions.Buy and self.get_now_share < 3 :
+    #         # 記錄開盤價
+    #         self.get_now_share +=1
+    #         change_moeny = -(close * (1 + self.alpha)) / price_ratio_factor # 資產減少
+            
+
+    #     elif action == Actions.Close and self.get_now_share > 0 :
+    #         self.get_now_share -=1                                                        
+    #         change_moeny = (close * (1 - self.alpha)) / price_ratio_factor
+            
+    #     self._offset += 1
+    #     # 判斷遊戲是否結束
+    #     done |= self._offset >= self._prices.close.shape[0] - 1 
+    #     self.current_money = self.current_money + change_moeny
+        
+    #     reward = (self.current_money - self.initial_investment ) / self.initial_investment *100
+    #     return reward, done
     
     def step(self, action,count_play_steps):
         """ 
             買進資產減少
             賣出資產增加
-
+            # 歸一化處理:
+            #     通過將每次交易的獎勵除以該股票當時的價格，對獎勵進行歸一化。
+            #     這種方法將每次交易的獎勵調整到一個相對一致的範圍，使其對總資金量的影響更加均衡。
+            
+            # 在第二次測試的時候我認為如果一直傳遞輸錢的資訊出去 會導致神經網絡歸零
         Args:
             action (_type_): _description_
         """
@@ -104,22 +151,25 @@ class State:
         # 慢慢更新難度
         self.update_alpha(count_play_steps)
         
+        price_ratio_factor = close / self.initial_investment
+        
         if action == Actions.Buy and self.get_now_share < 3 :
             # 記錄開盤價
             self.get_now_share +=1
-            reward = close * (1 + self.alpha) * (-1) # 資產減少
-                      
+            reward = -(close * (1 + self.alpha)) / price_ratio_factor # 資產減少
+            
 
         elif action == Actions.Close and self.get_now_share > 0 :
             self.get_now_share -=1                                                        
-            reward = close * (1 - self.alpha) * 1
+            reward = (close * (1 - self.alpha)) / price_ratio_factor
             
         self._offset += 1
         # 判斷遊戲是否結束
-        done |= self._offset >= self._prices.close.shape[0] - 1        
+        done |= self._offset >= self._prices.close.shape[0] - 1 
+        
+        
+        
         return reward, done
-    
-
 
 class Env():
     def __init__(self,data_type:str, random_ofs_on_reset=True) -> None:
@@ -146,7 +196,7 @@ class Env():
         else:
             offset = bars
 
-        print("此次步數為:",offset)
+        # print("此次步數為:",offset)
         self._state.reset(prices, offset)
         return self._state.encode()
     
@@ -171,11 +221,12 @@ class Env():
         action = Actions(action_idx)
         reward, done = self._state.step(action,count_play_steps) # 這邊會更新步數
         obs = self._state.encode() # 呼叫這裡的時候就會取得新的狀態
+        
         info = {
                 "instrument": self._instrument,
                 "offset": self._state._offset,
-                "init_money":10000
                 }
+        
         return obs, reward, done, info
     
     def info_provider(self) -> dict:

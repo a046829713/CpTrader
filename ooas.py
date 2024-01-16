@@ -12,7 +12,7 @@ class OOAS_Train():
     def __init__(self) -> None:
         self.train_env = Env(reset_on_close = False,random_ofs_on_reset= False)
         self.A_SPACE = {1,0} 
-        self.Agent = PolicyGradientAgent(lr=0.01,num_classes=len(self.A_SPACE))        
+        self.Agent = PolicyGradientAgent(lr=0.0001,num_classes=len(self.A_SPACE))        
         self.main()
         
     def main(self):        
@@ -143,7 +143,8 @@ class OOAS_Train():
                 
                 if first:
                     action = 0
-                    first = False                
+                    first = False
+                                    
                 actino_records.append(action)
                 
                 state_, done, info = test_env.step()

@@ -156,6 +156,7 @@ if __name__ == "__main__":
             loss_v = common.calc_loss(
                 batch, net, tgt_net.target_model, GAMMA ** REWARD_STEPS, device=device)
 
+            print(loss_v)
             if step_idx % WRITER_EVERY_STEP == 0:
                 writer.add_scalar("Loss_Value", loss_v.item(), step_idx)
 

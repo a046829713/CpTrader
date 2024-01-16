@@ -174,6 +174,7 @@ class AppSetting():
             "DEFAULT_SLIPPAGE": 0.0025,
             "SAVES_PATH": "saves",  # 儲存的路徑
             "BARS_COUNT": 50,  # 用來準備要取樣的特徵長度,例如:開高低收成交量各取10根K棒 
+            "INITIAL_INVESTMENT":10000
         }
         
         return setting_data

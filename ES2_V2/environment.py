@@ -18,7 +18,9 @@ class State:
         """
         self.bars_count = bars_count # 所需要使用的K棒數量
         self.setting = AppSetting.get_es_setting()                
-        
+        self.initial_investment = self.setting['INITIAL_INVESTMENT']
+        self.commission_perc= self.setting['MODEL_DEFAULT_COMMISSION_PERC']
+    
     @property
     def shape(self):
         """        
@@ -30,13 +32,15 @@ class State:
         """
             透過reset 來指定需要的標的物
         """
+        assert offset >= self.bars_count-1
         self._prices = prices
         self._offset = offset
         self.have_position = False
-        self.get_now_share = 0.0        
+        self.get_now_share = 0.0
         
-        
-        
+        self.open_price = 0.0
+        self.costs =0.0
+        self.Close_profit_percs = 0.0
     def encode(self):
         """
         Convert current state into numpy array.
@@ -51,14 +55,9 @@ class State:
             0.01155462 -0.00315126  0.00945378  0.0096463  -0.00214362  0.0096463
             0.          0.        ]
 
-            # 倒數第二個0 為部位
         """
         res = np.ndarray(shape=self.shape, dtype=np.float32)
-
         shift = 0
-
-        # 我認為這邊有一些問題,為甚麼要從1開始,而不從0開始呢?
-        # 1-10
         for bar_idx in range(-self.bars_count+1, 1):
             res[shift] = self._prices.high[self._offset + bar_idx]
             shift += 1
@@ -80,18 +79,19 @@ class State:
         """
         open = self._prices.open[self._offset]
         rel_close = self._prices.close[self._offset]
-        return open * (1.0 + rel_close)    
+        return open * (1.0 + rel_close) 
     
     def update_alpha(self,step_idx):
         # 每次调用时逐步增加alpha值，但不超过最大值
         self.alpha = min((step_idx / 10000000) *( self.setting['MODEL_DEFAULT_COMMISSION_PERC'] + self.setting['DEFAULT_SLIPPAGE'] ),self.setting['MODEL_DEFAULT_COMMISSION_PERC'] + self.setting['DEFAULT_SLIPPAGE'])
         
     
-    def step(self, action,count_play_steps):
+    def step(self, action, count_play_steps):
         """ 
             買進資產減少
             賣出資產增加
 
+            用來在ES策略產生排名用
         Args:
             action (_type_): _description_
         """
@@ -104,20 +104,82 @@ class State:
         # 慢慢更新難度
         self.update_alpha(count_play_steps)
         
-        if action == Actions.Buy and self.get_now_share < 3 :
+        
+        if action == Actions.Buy and self.get_now_share < 1 :            
             # 記錄開盤價
             self.get_now_share +=1
-            reward = close * (1 + self.alpha) * (-1) # 資產減少
+            reward = - close * (1 + self.alpha) # 資產減少
                       
 
         elif action == Actions.Close and self.get_now_share > 0 :
             self.get_now_share -=1                                                        
-            reward = close * (1 - self.alpha) * 1
+            reward = close * (1 - self.alpha)
             
         self._offset += 1
         # 判斷遊戲是否結束
-        done |= self._offset >= self._prices.close.shape[0] - 1        
-        return reward, done
+        done |= self._offset >= self._prices.close.shape[0] - 1
+        
+        # 在訓練ES過程中，為了要訓練最後一定要賣掉，所以特別這樣設計
+        # 在正式交易中最後一根K棒並不會平倉 
+        if done and self.get_now_share> 0:
+            reward = close * (1 - self.alpha) * self.get_now_share
+
+            
+        return reward, done    
+    
+    # def step(self, action, count_play_steps):
+    #     """
+    #         reward :
+    #             ( current money - init_money ) / init_moeny / (openprice / init_moeny)
+
+    #         current money = 起始資金 + 已平倉累積損益(已算入滑價) + (- 手續費) + 未平倉損益
+
+
+    #         # 參考Meta 論文
+    #         # 將 (出場價格 - 入場價格) / 入場價格 單純的去取得變化率如何? 
+            
+    #         用來更新Meta model 的loss 
+    #     Args:
+    #     """
+    #     assert isinstance(action, Actions) 
+        
+    #     reward = 0.0
+    #     done = False
+    #     close = self._cur_close()
+        
+    #     cost = 0.0
+    #     closecash_diff = 0.0
+    #     opencash_diff = 0.0
+                
+    #     # 第一根買的時候不計算未平倉損益
+    #     if self.have_position:
+    #         opencash_diff = (close - self.open_price) / self.open_price
+        
+        
+    #     if action == Actions.Buy and not self.have_position:
+    #         self.have_position = True
+    #         # 記錄開盤價
+    #         self.open_price = close * (1 + self.setting['DEFAULT_SLIPPAGE'])            
+    #         cost = -self.commission_perc            
+
+    #     elif action == Actions.Close and self.have_position:            
+    #         cost = -self.commission_perc                        
+    #         # 計算出賣掉的資產變化率,並且累加起來
+    #         closecash_diff = (close * (1 - self.setting['DEFAULT_SLIPPAGE']) - self.open_price) / self.open_price
+    #         opencash_diff = 0.0 
+    #         self.have_position = False            
+    #         self.open_price = 0.0
+            
+    #     self.costs += cost
+    #     self.Close_profit_percs += closecash_diff 
+    #     current_money_perc =  1 + self.Close_profit_percs - self.costs + opencash_diff
+    #     reward = (current_money_perc - 1) / 1 *100
+
+        
+    #     self._offset += 1
+    #     # 判斷遊戲是否結束
+    #     done |= self._offset >= self._prices.close.shape[0] - 1
+    #     return reward, done
     
 
 
@@ -146,7 +208,7 @@ class Env():
         else:
             offset = bars
 
-        print("此次步數為:",offset)
+        # print("此次步數為:",offset)
         self._state.reset(prices, offset)
         return self._state.encode()
     
@@ -171,11 +233,40 @@ class Env():
         action = Actions(action_idx)
         reward, done = self._state.step(action,count_play_steps) # 這邊會更新步數
         obs = self._state.encode() # 呼叫這裡的時候就會取得新的狀態
+        
         info = {
                 "instrument": self._instrument,
                 "offset": self._state._offset,
-                "init_money":10000
                 }
+        
+        
+        return obs, reward, done, info
+    
+    def MAML_step(self, action_idx):
+        """
+            retunr : 
+                oberservation_ (下一個觀察狀態),
+                reward(獎勵),
+                done(是否完成),
+                info(其他資料),
+        
+            呼叫子類_state 來獲得獎勵
+        Args:
+            action_idx (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
+        action = Actions(action_idx)
+        reward, done = self._state.Meta_step(action) # 這邊會更新步數
+        obs = self._state.encode() # 呼叫這裡的時候就會取得新的狀態
+        
+        info = {
+                "instrument": self._instrument,
+                "offset": self._state._offset,
+                }
+        
+        
         return obs, reward, done, info
     
     def info_provider(self) -> dict:
