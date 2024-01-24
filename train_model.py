@@ -31,7 +31,7 @@ REPLAY_SIZE = 100000
 REPLAY_INITIAL = 10000
 REWARD_STEPS = 2
 EPSILON_STOP = 0.1
-CHECKPOINT_EVERY_STEP = 100000
+CHECKPOINT_EVERY_STEP = 100
 VALIDATION_EVERY_STEP = 100000
 WRITER_EVERY_STEP = 100
 
@@ -42,11 +42,10 @@ setting = AppSetting.get_DQN_setting()
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    EPSILON_STEPS = 2000000 
-    # EPSILON_STEPS = 1000000
-
+    # EPSILON_STEPS = 2000000 
+    EPSILON_STEPS = 1000000
     env = environ.StocksEnv(bars_count=setting['BARS_COUNT'],reset_on_close = setting['RESET_ON_CLOSE'],state_1d=setting['STATE_1D'], reward_on_close=setting['REWARD_ON_CLOSE'], volumes=setting['VOLUMES_TURNON'])
-
+    symbol_code = list(env._prices.keys())[0]
     env = gym.wrappers.TimeLimit(env, max_episode_steps=5000)
 
     if setting['STATE_1D']:
@@ -97,9 +96,10 @@ if __name__ == "__main__":
         
     else:
         print("建立新的儲存點")
+        
         # 用來儲存的位置
         saves_path = os.path.join(setting['SAVES_PATH'], datetime.strftime(
-            datetime.now(), "%Y%m%d-%H%M%S") + '-' + str(setting['BARS_COUNT']) + 'k-' + str(setting['REWARD_ON_CLOSE']))
+            datetime.now(), "%Y%m%d-%H%M%S") + '-' + str(setting['BARS_COUNT']) + 'k-' + str(setting['REWARD_ON_CLOSE'])  +'-' + symbol_code)
 
         os.makedirs(saves_path, exist_ok=True)
         step_idx = 0
@@ -126,29 +126,29 @@ if __name__ == "__main__":
             if len(buffer) < REPLAY_INITIAL:
                 continue
 
-            if step_idx % setting['EVAL_EVERY_STEP'] == 0:
-                mean_vals = []
+            # if step_idx % setting['EVAL_EVERY_STEP'] == 0:
+            #     mean_vals = []
                 
-                with torch.no_grad():  # 禁用梯度計算
-                    for _ in range(setting['NUM_EVAL_EPISODES']):
-                        # 更新驗證資料
-                        eval_states = common.update_eval_states(
-                            buffer,setting['STATES_TO_EVALUATE'] )
-                        # 計算平均
-                        mean_val = common.calc_values_of_states(
-                            eval_states, net, device=device)                        
-                        mean_vals.append(mean_val)
+            #     with torch.no_grad():  # 禁用梯度計算
+            #         for _ in range(setting['NUM_EVAL_EPISODES']):
+            #             # 更新驗證資料
+            #             eval_states = common.update_eval_states(
+            #                 buffer,setting['STATES_TO_EVALUATE'] )
+            #             # 計算平均
+            #             mean_val = common.calc_values_of_states(
+            #                 eval_states, net, device=device)                        
+            #             mean_vals.append(mean_val)
 
-                mean_of_means = np.mean(mean_vals)
+            #     mean_of_means = np.mean(mean_vals)
 
-                writer.add_scalar("values_mean", mean_of_means, step_idx)
-                if best_mean_val is None or best_mean_val < mean_of_means:
-                    if best_mean_val is not None:
-                        print("%d: Best mean value updated %.3f -> %.3f" %
-                              (step_idx, best_mean_val, mean_of_means))
-                    best_mean_val = mean_of_means
-                    torch.save(net.state_dict(), os.path.join(
-                        saves_path, "mean_val-%.3f.data" % mean_of_means))
+            #     writer.add_scalar("values_mean", mean_of_means, step_idx)
+            #     if best_mean_val is None or best_mean_val < mean_of_means:
+            #         if best_mean_val is not None:
+            #             print("%d: Best mean value updated %.3f -> %.3f" %
+            #                   (step_idx, best_mean_val, mean_of_means))
+            #         best_mean_val = mean_of_means
+            #         torch.save(net.state_dict(), os.path.join(
+            #             saves_path, "mean_val-%.3f.data" % mean_of_means))
 
             optimizer.zero_grad()
             batch = buffer.sample(setting['BATCH_SIZE'])
@@ -156,7 +156,7 @@ if __name__ == "__main__":
             loss_v = common.calc_loss(
                 batch, net, tgt_net.target_model, GAMMA ** REWARD_STEPS, device=device)
 
-            print(loss_v)
+            
             if step_idx % WRITER_EVERY_STEP == 0:
                 writer.add_scalar("Loss_Value", loss_v.item(), step_idx)
 
@@ -171,6 +171,8 @@ if __name__ == "__main__":
             def save_checkpoint(state, filename):
                 torch.save(state, filename)
 
+            
+            print("目前次數:",step_idx,"保存點:",CHECKPOINT_EVERY_STEP)
             # 在主訓練循環中的合適位置插入保存檢查點的代碼
             if step_idx % CHECKPOINT_EVERY_STEP == 0:
                 idx = step_idx // CHECKPOINT_EVERY_STEP

@@ -68,9 +68,6 @@ class NeuroEvolution:
             rewards.append(reward)
             state = torch.from_numpy(state_).view(1, self.env_info_static['shapeOfFeature'][0]).to(self.device)            
             
-        
-        print("獎勵總和:",sum(rewards))
-        print('*'*120) 
         return sum(rewards)/ info['init_money']
     
     def evaluate_population(self, env):
@@ -135,15 +132,15 @@ class NeuroEvolution:
         epoch = 0
         for epoch in range(generations):
             self.evaluate_population(self.train_env)            
-            fitnesses = [i.train_fitness for i in self.populations]
-            print(fitnesses)
+            fitnesses = [i.train_fitness for i in self.populations]            
             sort_fitness = np.argsort(fitnesses)[::-1]
             self.populations = [self.populations[i] for i in sort_fitness]
+            print("目前分數狀況為:",[i.train_fitness for i in self.populations])
             fittest_individual = self.populations[0] 
 
             
             if (epoch+1) % checkpoint == 0:
-                print('epoch %d, fittest individual %d with accuracy %f'%(epoch+1, sort_fitness[0],fittest_individual.train_fitness))                
+                print('epoch %d, fittest individual %d with train_fitness %f'%(epoch+1, sort_fitness[0],fittest_individual.train_fitness))                
                 score = self.test_model(fittest_individual,self.val_env)
                 val_score = (fittest_individual.train_fitness + score ) / 2
                 if self.best_fitness is None:

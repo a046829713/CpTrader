@@ -107,12 +107,7 @@ class State:
         rel_close = self._prices.close[self._offset]
         return open * (1.0 + rel_close)
     
-    def update_N_steps(self, max_length:int = 1000):
-        if self.state_count % 200000 == 0:            
-            self.N_steps += 100
-            print("更新過的N_steps:",self.N_steps)
-            if self.N_steps >= max_length:
-                self.N_steps = max_length
+
     
     def curriculum(self):
         self.state_count += 1 # 總遊戲次數
@@ -131,9 +126,6 @@ class State:
         """
         assert isinstance(action, Actions)       
         
-        # 設計用來教育智能體的課程
-        self.curriculum()
-        
         
         reward = 0.0
         done = False
@@ -145,7 +137,6 @@ class State:
         opencash_diff = 0.0
         # 手續費
         cost = 0.0
-        
         # 懲罰
         punish = 0.0
         
@@ -289,33 +280,11 @@ class StocksEnv(gym.Env):
         reward, done = self._state.step(action) # 這邊會更新步數
         obs = self._state.encode() # 呼叫這裡的時候就會取得新的狀態
         info = {"instrument": self._instrument, "offset": self._state._offset}
-        
-        self.curriculum()
+
         return obs, reward, done, info
 
 
-    def curriculum(self):
-        # 更新標的
-        self.targetsymbols = ['BTCUSDT',
-                              'SOLUSDT',
-                              'BTCDOMUSDT',
-                              'DEFIUSDT',
-                              'XMRUSDT',
-                              'AAVEUSDT',
-                              'TRBUSDT',
-                              'MKRUSDT',
-                              'OGNUSDT',
-                              'RNDRUSDT',
-                              "DASHUSDT",
-                              "GASUSDT",
-        ]
-        
-        if self._state.state_count % 500000 == 0 and self._state.state_count !=1:
-            new_targets_index,_ = divmod(self._state.state_count,500000)
-            dataF = DataFeature()
-            dataF.targetsymbols = self.targetsymbols[0 : new_targets_index]
-            # 更新資料
-            self._prices = dataF.get_train_net_work_data()
+
     
     
     def render(self, mode='human', close=False):

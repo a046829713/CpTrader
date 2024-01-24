@@ -29,18 +29,38 @@ class MAML():
         self.tasks = ["BTCUSDT"]  # 定义任务分布
         self.maml_train(num_iterations=1000)
     
-    def calculate_loss(self,adapted_model):
-        # 元策略選擇商品機率
-        _,maml_model_probs, maml_model_actions, maml_model_rewards = self.neuroEvolution.test_model(self.maml_model,self.neuroEvolution.train_env)
-        _,adapted_model_probs, adapted_model_actions,adapted_model_rewards = self.neuroEvolution.test_model(adapted_model,self.neuroEvolution.train_env)
+    # def calculate_loss(self,adapted_model):
+    #     # 元策略選擇商品機率
+    #     _,maml_model_probs, maml_model_actions, maml_model_rewards = self.neuroEvolution.test_model(self.maml_model,self.neuroEvolution.train_env)
+    #     _,adapted_model_probs, adapted_model_actions,adapted_model_rewards = self.neuroEvolution.test_model(adapted_model,self.neuroEvolution.train_env)
 
         
-        maml_model_probs = torch.stack(maml_model_probs).squeeze(1)
-        adapted_model_actions = torch.tensor(adapted_model_actions).to(self.neuroEvolution.device)
+    #     maml_model_probs = torch.stack(maml_model_probs).squeeze(1)
+    #     adapted_model_actions = torch.tensor(adapted_model_actions).to(self.neuroEvolution.device)
 
 
-        return  nn.CrossEntropyLoss()(maml_model_probs, adapted_model_actions)
+    #     return  nn.CrossEntropyLoss()(maml_model_probs, adapted_model_actions)
 
+    def calculate_loss(self,adapted_model,gamma=1):
+        # 元策略選擇商品機率
+        _, maml_model_logprobs, maml_model_rewards = self.neuroEvolution.test_model(self.maml_model,self.neuroEvolution.train_env)
+        _, adapted_model_logprobs,adapted_model_rewards = self.neuroEvolution.test_model(adapted_model,self.neuroEvolution.train_env)
+        # 將rewards,logprobs,的元素順序顛倒,以方便計算折扣回報陣列
+        logprobs = torch.stack(maml_model_logprobs).flip(dims=(0,))
+        print(k)
+        rewards = torch.Tensor(adapted_model_rewards).flip(dims=(0,)).to(self.neuroEvolution.device)
+        Returns = []
+        ret_ = 0
+        for r in range(rewards.shape[0]): #B
+            ret_ = rewards[r] + gamma * ret_
+            Returns.append(ret_)
+        
+        Returns = torch.stack(Returns).view(-1)
+        Returns = F.normalize(Returns,dim=0)
+        
+        loss = -1* logprobs * Returns
+        return loss.sum()
+    
     
     def maml_train(self, num_iterations):
         """

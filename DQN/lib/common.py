@@ -143,9 +143,9 @@ def calc_loss(batch, net, tgt_net, gamma, device="cpu"):
 
     done_mask = torch.tensor(dones, dtype=torch.bool).to(device)
 
-
     state_action_values = net(states_v).gather(
         1, actions_v.unsqueeze(-1)).squeeze(-1)
+
 
     next_state_actions = net(next_states_v).max(1)[1]
     

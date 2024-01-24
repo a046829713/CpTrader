@@ -84,8 +84,8 @@ class State:
     
     def update_alpha(self,step_idx):
         # 每次调用时逐步增加alpha值，但不超过最大值
-        self.alpha = min((step_idx / 10000000) *( self.setting['MODEL_DEFAULT_COMMISSION_PERC'] + self.setting['DEFAULT_SLIPPAGE'] ),self.setting['MODEL_DEFAULT_COMMISSION_PERC'] + self.setting['DEFAULT_SLIPPAGE'])
-        
+        # self.alpha = min((step_idx / 10000000) *( self.setting['MODEL_DEFAULT_COMMISSION_PERC'] + self.setting['DEFAULT_SLIPPAGE'] ),self.setting['MODEL_DEFAULT_COMMISSION_PERC'] + self.setting['DEFAULT_SLIPPAGE'])
+        self.alpha = 0
     
     def step(self, action,count_play_steps):
         """ 
